@@ -15,7 +15,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
 }) => {
   const [authMode, setAuthMode] = useState<'pin' | 'supabase'>('pin');
   const [pin, setPin] = useState('');
-  const [email, setEmail] = useState('supamaya256@gmail.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -74,31 +74,32 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
         setError('Login failed. Please check credentials.');
       }
     } catch (err: any) {
-      setError('Supabase auth error: ' + err.message);
+      setError('Authentication error: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-sm rounded-3xl glass-nav-bar p-6 sm:p-8 text-white shadow-2xl border border-white/30 space-y-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-[360px] sm:max-w-sm rounded-3xl glass-nav-bar p-5 sm:p-7 text-white shadow-2xl border border-white/30 space-y-4 sm:space-y-5 max-h-[92vh] overflow-y-auto no-scrollbar">
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-full bg-white/10 text-slate-300 hover:text-white hover:bg-white/20 transition"
+          className="absolute top-4 right-4 p-1.5 rounded-full bg-white/10 text-slate-300 hover:text-white hover:bg-white/20 transition cursor-pointer"
+          aria-label="Close modal"
         >
           <X className="w-4 h-4" />
         </button>
 
         {/* Modal Header */}
-        <div className="text-center space-y-2">
-          <div className="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-400/30 flex items-center justify-center mx-auto shadow-lg">
-            <Lock className="w-7 h-7" />
+        <div className="text-center space-y-2 pt-1">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-400/30 flex items-center justify-center mx-auto shadow-lg">
+            <Lock className="w-6 h-6 sm:w-7 sm:h-7" />
           </div>
 
-          <h3 className="text-lg font-black chrome-text font-display uppercase tracking-wider">
+          <h3 className="text-base sm:text-lg font-black chrome-text font-display uppercase tracking-wider">
             DJ EMMA PRO ADMIN
           </h3>
 
@@ -112,24 +113,24 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
           <button
             type="button"
             onClick={() => { setAuthMode('pin'); setError(''); }}
-            className={`flex-1 py-1.5 rounded-full transition ${
+            className={`flex-1 py-1.5 px-2 rounded-full transition text-[11px] sm:text-xs cursor-pointer ${
               authMode === 'pin'
-                ? 'bg-amber-500 text-slate-950 shadow'
+                ? 'bg-amber-500 text-slate-950 shadow font-extrabold'
                 : 'text-slate-300 hover:text-white'
             }`}
           >
-            Master PIN (2560)
+            MASTER PIN
           </button>
           <button
             type="button"
             onClick={() => { setAuthMode('supabase'); setError(''); }}
-            className={`flex-1 py-1.5 rounded-full transition ${
+            className={`flex-1 py-1.5 px-2 rounded-full transition text-[11px] sm:text-xs cursor-pointer ${
               authMode === 'supabase'
-                ? 'bg-amber-500 text-slate-950 shadow'
+                ? 'bg-amber-500 text-slate-950 shadow font-extrabold'
                 : 'text-slate-300 hover:text-white'
             }`}
           >
-            Supabase Account
+            DJ EMMA PRO ACCOUNT
           </button>
         </div>
 
@@ -151,7 +152,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
                 autoFocus
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
-                placeholder="Enter PIN (Default: 2560)"
+                placeholder="Enter Admin PIN"
                 className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900/90 border border-white/20 text-white text-center text-sm tracking-widest focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 placeholder:text-slate-500"
               />
             </div>
@@ -159,7 +160,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 font-extrabold text-xs uppercase tracking-widest shadow-lg hover:scale-102 active:scale-98 transition disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 font-extrabold text-xs uppercase tracking-widest shadow-lg hover:scale-102 active:scale-98 transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
             >
               <ShieldCheck className="w-4 h-4" />
               <span>{loading ? 'VERIFYING...' : 'UNLOCK DASHBOARD'}</span>
@@ -167,7 +168,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
           </form>
         )}
 
-        {/* Supabase Email/Password Form */}
+        {/* DJ Emma Pro Account Email/Password Form */}
         {authMode === 'supabase' && (
           <form onSubmit={handleSupabaseSubmit} className="space-y-3">
             <div className="relative">
@@ -178,7 +179,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Admin Email"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/90 border border-white/20 text-white text-xs focus:outline-none focus:border-amber-400"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/90 border border-white/20 text-white text-xs focus:outline-none focus:border-amber-400 placeholder:text-slate-500"
               />
             </div>
 
@@ -190,27 +191,21 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
                 autoFocus
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Supabase Password"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/90 border border-white/20 text-white text-xs focus:outline-none focus:border-amber-400"
+                placeholder="Account Password"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/90 border border-white/20 text-white text-xs focus:outline-none focus:border-amber-400 placeholder:text-slate-500"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 font-extrabold text-xs uppercase tracking-widest shadow-lg hover:scale-102 active:scale-98 transition disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 font-extrabold text-xs uppercase tracking-widest shadow-lg hover:scale-102 active:scale-98 transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
             >
               <ShieldCheck className="w-4 h-4" />
-              <span>{loading ? 'AUTHENTICATING...' : 'SIGN IN WITH SUPABASE'}</span>
+              <span>{loading ? 'AUTHENTICATING...' : 'SIGN IN TO DJ EMMA PRO ACCOUNT'}</span>
             </button>
           </form>
         )}
-
-        <div className="text-center">
-          <span className="text-[11px] text-slate-400 font-mono">
-            Master PIN: <span className="text-amber-300 font-bold">2560</span> • Email: <span className="text-amber-300">supamaya256@gmail.com</span>
-          </span>
-        </div>
       </div>
     </div>
   );
