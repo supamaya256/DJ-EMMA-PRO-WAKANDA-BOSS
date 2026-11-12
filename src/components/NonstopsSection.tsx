@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Pause, Search, Music, Disc3, Heart, Calendar, PlusCircle, ListMusic, ChevronDown, ChevronUp } from 'lucide-react';
+import { Play, Pause, Search, Music, Disc3, Heart, Calendar, PlusCircle, ListMusic, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react';
 import { NonstopMix } from '../types';
 import { useAudio } from '../context/AudioContext';
 import { isItemLikedByVisitor } from '../lib/visitor';
@@ -9,6 +9,7 @@ interface NonstopsSectionProps {
   isAdmin: boolean;
   onOpenUpload: () => void;
   onLikeNonstop: (id: string) => void;
+  onOpenComments?: (id: string, type: 'nonstop', title: string) => void;
 }
 
 export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
@@ -16,6 +17,7 @@ export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
   isAdmin,
   onOpenUpload,
   onLikeNonstop,
+  onOpenComments,
 }) => {
   const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,7 +66,7 @@ export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
           {isAdmin && (
             <button
               onClick={onOpenUpload}
-              className="self-start md:self-center px-6 py-3.5 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-extrabold text-sm uppercase tracking-wider flex items-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:scale-105 transition"
+              className="self-start md:self-center px-6 py-3.5 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-extrabold text-sm uppercase tracking-wider flex items-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:scale-105 transition cursor-pointer"
             >
               <PlusCircle className="w-5 h-5" />
               <span>UPLOAD NEW NONSTOP</span>
@@ -111,7 +113,7 @@ export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
           {isAdmin && publishedNonstops.length === 0 && (
             <button
               onClick={onOpenUpload}
-              className="mt-2 px-5 py-2.5 rounded-full bg-purple-500 text-white font-extrabold text-xs uppercase tracking-wider inline-flex items-center gap-2 hover:scale-105 transition"
+              className="mt-2 px-5 py-2.5 rounded-full bg-purple-500 text-white font-extrabold text-xs uppercase tracking-wider inline-flex items-center gap-2 hover:scale-105 transition cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
               <span>UPLOAD FIRST NONSTOP</span>
@@ -147,7 +149,7 @@ export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
                           playTrack(nonstop, 'nonstop');
                         }
                       }}
-                      className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-white/95 hover:bg-white text-slate-950 flex items-center justify-center shadow-2xl transition hover:scale-110 active:scale-95"
+                      className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-white/95 hover:bg-white text-slate-950 flex items-center justify-center shadow-2xl transition hover:scale-110 active:scale-95 cursor-pointer"
                       title={isThisPlaying ? 'Pause' : 'Play nonstop'}
                     >
                       {isThisPlaying ? (
@@ -188,7 +190,7 @@ export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
                       <div className="mt-4 pt-3 border-t border-white/10">
                         <button
                           onClick={() => setExpandedTracklistId(isExpanded ? null : nonstop.id)}
-                          className="flex items-center justify-between w-full text-xs font-semibold text-purple-300 hover:text-white transition py-1"
+                          className="flex items-center justify-between w-full text-xs font-semibold text-purple-300 hover:text-white transition py-1 cursor-pointer"
                         >
                           <span className="flex items-center gap-1.5">
                             <ListMusic className="w-4 h-4 text-purple-400" />
@@ -222,18 +224,29 @@ export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
                     <span className="font-mono text-slate-300">{nonstop.playsCount} plays</span>
                   </div>
 
-                  <button
-                    onClick={() => onLikeNonstop(nonstop.id)}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition active:scale-95 ${
-                      isItemLikedByVisitor('dj_emma_liked_nonstops', nonstop.id)
-                        ? 'bg-rose-500/25 text-rose-300 border-rose-400/50'
-                        : 'bg-white/5 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border-white/10'
-                    }`}
-                    title={isItemLikedByVisitor('dj_emma_liked_nonstops', nonstop.id) ? 'Unlike nonstop' : 'Like this nonstop'}
-                  >
-                    <Heart className={`w-3.5 h-3.5 ${isItemLikedByVisitor('dj_emma_liked_nonstops', nonstop.id) ? 'fill-rose-500 text-rose-400' : 'fill-rose-500/30 text-rose-400'}`} />
-                    <span className="font-bold text-white">{nonstop.likesCount}</span>
-                  </button>
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <button
+                      onClick={() => onOpenComments?.(nonstop.id, 'nonstop', nonstop.title)}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-purple-300 border border-white/10 transition text-xs cursor-pointer"
+                      title="View & post comments"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 text-purple-400" />
+                      <span className="text-[11px]">Comments</span>
+                    </button>
+
+                    <button
+                      onClick={() => onLikeNonstop(nonstop.id)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition active:scale-95 cursor-pointer ${
+                        isItemLikedByVisitor('dj_emma_liked_nonstops', nonstop.id)
+                          ? 'bg-rose-500/25 text-rose-300 border-rose-400/50'
+                          : 'bg-white/5 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border-white/10'
+                      }`}
+                      title={isItemLikedByVisitor('dj_emma_liked_nonstops', nonstop.id) ? 'Unlike nonstop' : 'Like this nonstop'}
+                    >
+                      <Heart className={`w-3.5 h-3.5 ${isItemLikedByVisitor('dj_emma_liked_nonstops', nonstop.id) ? 'fill-rose-500 text-rose-400' : 'fill-rose-500/30 text-rose-400'}`} />
+                      <span className="font-bold text-white">{nonstop.likesCount}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             );

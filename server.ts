@@ -463,10 +463,7 @@ app.post('/api/mixes/:id/like', async (req, res) => {
   const { id } = req.params;
   const visitorId = (req.body?.visitorId || req.headers['x-visitor-id'] || 'v_' + req.ip) as string;
   const db = readDb();
-  const mix = db.liveMixes.find((m) => m.id === id);
-  if (!mix) {
-    return res.status(404).json({ error: 'Live mix not found' });
-  }
+  let mix = db.liveMixes.find((m) => m.id === id);
 
   const supabase = getSupabaseClient();
   if (supabase) {
@@ -477,17 +474,28 @@ app.post('/api/mixes/:id/like', async (req, res) => {
         p_visitor_id: visitorId,
       });
       if (!error && data) {
-        mix.likesCount = data.likes_count;
-        saveDb(db);
+        if (mix) {
+          mix.likesCount = data.likes_count;
+          saveDb(db);
+        }
         return res.json({ success: true, liked: data.liked, likesCount: data.likes_count });
       }
-    } catch {
-      // Fallback
-    }
+    } catch {}
+
+    try {
+      const { data: cloudMix } = await supabase.from('live_mixes').select('likes_count').eq('id', id).single();
+      const currentCount = cloudMix ? (cloudMix.likes_count || 0) : (mix?.likesCount || 0);
+      const result = handleToggleLike(db, id, visitorId, currentCount);
+      await supabase.from('live_mixes').update({ likes_count: result.count }).eq('id', id);
+      if (mix) mix.likesCount = result.count;
+      saveDb(db);
+      return res.json({ success: true, liked: result.liked, likesCount: result.count });
+    } catch {}
   }
 
-  const result = handleToggleLike(db, id, visitorId, mix.likesCount || 0);
-  mix.likesCount = result.count;
+  const currentCount = mix ? (mix.likesCount || 0) : 0;
+  const result = handleToggleLike(db, id, visitorId, currentCount);
+  if (mix) mix.likesCount = result.count;
   saveDb(db);
   return res.json({ success: true, liked: result.liked, likesCount: result.count });
 });
@@ -643,10 +651,7 @@ app.post('/api/nonstops/:id/like', async (req, res) => {
   const { id } = req.params;
   const visitorId = (req.body?.visitorId || req.headers['x-visitor-id'] || 'v_' + req.ip) as string;
   const db = readDb();
-  const nonstop = db.nonstops.find((n) => n.id === id);
-  if (!nonstop) {
-    return res.status(404).json({ error: 'Nonstop not found' });
-  }
+  let nonstop = db.nonstops.find((n) => n.id === id);
 
   const supabase = getSupabaseClient();
   if (supabase) {
@@ -657,17 +662,28 @@ app.post('/api/nonstops/:id/like', async (req, res) => {
         p_visitor_id: visitorId,
       });
       if (!error && data) {
-        nonstop.likesCount = data.likes_count;
-        saveDb(db);
+        if (nonstop) {
+          nonstop.likesCount = data.likes_count;
+          saveDb(db);
+        }
         return res.json({ success: true, liked: data.liked, likesCount: data.likes_count });
       }
-    } catch {
-      // Fallback
-    }
+    } catch {}
+
+    try {
+      const { data: cloudNonstop } = await supabase.from('nonstop_mixes').select('likes_count').eq('id', id).single();
+      const currentCount = cloudNonstop ? (cloudNonstop.likes_count || 0) : (nonstop?.likesCount || 0);
+      const result = handleToggleLike(db, id, visitorId, currentCount);
+      await supabase.from('nonstop_mixes').update({ likes_count: result.count }).eq('id', id);
+      if (nonstop) nonstop.likesCount = result.count;
+      saveDb(db);
+      return res.json({ success: true, liked: result.liked, likesCount: result.count });
+    } catch {}
   }
 
-  const result = handleToggleLike(db, id, visitorId, nonstop.likesCount || 0);
-  nonstop.likesCount = result.count;
+  const currentCount = nonstop ? (nonstop.likesCount || 0) : 0;
+  const result = handleToggleLike(db, id, visitorId, currentCount);
+  if (nonstop) nonstop.likesCount = result.count;
   saveDb(db);
   return res.json({ success: true, liked: result.liked, likesCount: result.count });
 });
@@ -917,10 +933,7 @@ app.post('/api/news/:id/like', async (req, res) => {
   const visitorId = (req.body?.visitorId || req.headers['x-visitor-id'] || 'v_' + req.ip) as string;
   const db = readDb();
   if (!db.newsPosts) db.newsPosts = [];
-  const post = db.newsPosts.find((p) => p.id === id);
-  if (!post) {
-    return res.status(404).json({ error: 'News post not found' });
-  }
+  let post = db.newsPosts.find((p) => p.id === id);
 
   const supabase = getSupabaseClient();
   if (supabase) {
@@ -930,19 +943,123 @@ app.post('/api/news/:id/like', async (req, res) => {
         p_visitor_id: visitorId,
       });
       if (!error && data) {
-        post.likesCount = data.likes_count;
-        saveDb(db);
+        if (post) {
+          post.likesCount = data.likes_count;
+          saveDb(db);
+        }
         return res.json({ success: true, liked: data.liked, likesCount: data.likes_count });
       }
+    } catch {}
+
+    try {
+      const { data: cloudPost } = await supabase.from('news_posts').select('likes_count').eq('id', id).single();
+      const currentCount = cloudPost ? (cloudPost.likes_count || 0) : (post?.likesCount || 0);
+      const result = handleToggleLike(db, id, visitorId, currentCount);
+      await supabase.from('news_posts').update({ likes_count: result.count }).eq('id', id);
+      if (post) post.likesCount = result.count;
+      saveDb(db);
+      return res.json({ success: true, liked: result.liked, likesCount: result.count });
+    } catch {}
+  }
+
+  const currentCount = post ? (post.likesCount || 0) : 0;
+  const result = handleToggleLike(db, id, visitorId, currentCount);
+  if (post) post.likesCount = result.count;
+  saveDb(db);
+  return res.json({ success: true, liked: result.liked, likesCount: result.count });
+});
+
+// ----------------------------------------------------
+// 9. PUBLIC COMMENTS API (Anyone can comment and read)
+// ----------------------------------------------------
+const COMMENTS_FILE = path.join(DATA_DIR, 'comments.json');
+
+function readComments(): any[] {
+  try {
+    if (fs.existsSync(COMMENTS_FILE)) {
+      const content = fs.readFileSync(COMMENTS_FILE, 'utf-8');
+      return JSON.parse(content);
+    }
+  } catch (err) {
+    console.error('Error reading comments file:', err);
+  }
+  return [];
+}
+
+function saveComments(comments: any[]) {
+  try {
+    fs.writeFileSync(COMMENTS_FILE, JSON.stringify(comments, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('Error writing comments file:', err);
+  }
+}
+
+app.get('/api/comments', (req, res) => {
+  const { targetId } = req.query;
+  const comments = readComments();
+  if (targetId) {
+    const filtered = comments.filter((c: any) => c.targetId === targetId);
+    return res.json(filtered);
+  }
+  return res.json(comments);
+});
+
+app.get('/api/comments/counts', (_req, res) => {
+  const comments = readComments();
+  const counts: Record<string, number> = {};
+  for (const c of comments) {
+    if (c.targetId) {
+      counts[c.targetId] = (counts[c.targetId] || 0) + 1;
+    }
+  }
+  return res.json(counts);
+});
+
+app.post('/api/comments', async (req, res) => {
+  const { targetId, targetType, authorName, content } = req.body;
+  if (!targetId || !content || !content.trim()) {
+    return res.status(400).json({ error: 'Target ID and comment content are required' });
+  }
+
+  const newComment = {
+    id: 'c_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+    targetId,
+    targetType: targetType || 'news',
+    authorName: (authorName || 'Wakanda Fan').trim(),
+    content: content.trim(),
+    createdAt: new Date().toISOString(),
+  };
+
+  const comments = readComments();
+  comments.unshift(newComment);
+  saveComments(comments);
+
+  // Attempt to write to Supabase if comments table exists
+  const supabase = getSupabaseClient();
+  if (supabase) {
+    try {
+      await supabase.from('comments').insert({
+        id: newComment.id,
+        target_id: newComment.targetId,
+        target_type: newComment.targetType,
+        author_name: newComment.authorName,
+        content: newComment.content,
+        created_at: newComment.createdAt,
+      });
     } catch {
-      // Fallback
+      // Ignored if table does not exist
     }
   }
 
-  const result = handleToggleLike(db, id, visitorId, post.likesCount || 0);
-  post.likesCount = result.count;
-  saveDb(db);
-  return res.json({ success: true, liked: result.liked, likesCount: result.count });
+  return res.status(201).json({ success: true, comment: newComment });
+});
+
+app.delete('/api/comments/:id', (req, res) => {
+  const { id } = req.params;
+  const comments = readComments();
+  const filtered = comments.filter((c: any) => c.id !== id);
+  saveComments(filtered);
+  return res.json({ success: true, message: 'Comment deleted' });
 });
 
 

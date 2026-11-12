@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Pause, Search, Radio, Disc3, Heart, Calendar, PlusCircle, Share2, Check } from 'lucide-react';
+import { Play, Pause, Search, Radio, Disc3, Heart, Calendar, PlusCircle, Share2, Check, MessageSquare } from 'lucide-react';
 import { LiveMix } from '../types';
 import { useAudio } from '../context/AudioContext';
 import { isItemLikedByVisitor } from '../lib/visitor';
@@ -9,6 +9,7 @@ interface LiveMixesSectionProps {
   isAdmin: boolean;
   onOpenUpload: () => void;
   onLikeMix: (id: string) => void;
+  onOpenComments?: (id: string, type: 'live', title: string) => void;
 }
 
 export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
@@ -16,6 +17,7 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
   isAdmin,
   onOpenUpload,
   onLikeMix,
+  onOpenComments,
 }) => {
   const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
   const [searchQuery, setSearchQuery] = useState('');
@@ -75,7 +77,7 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
           {isAdmin && (
             <button
               onClick={onOpenUpload}
-              className="self-start md:self-center px-6 py-3.5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 font-extrabold text-sm uppercase tracking-wider flex items-center gap-2 shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:scale-105 transition"
+              className="self-start md:self-center px-6 py-3.5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 font-extrabold text-sm uppercase tracking-wider flex items-center gap-2 shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:scale-105 transition cursor-pointer"
             >
               <PlusCircle className="w-5 h-5" />
               <span>UPLOAD NEW LIVE MIX</span>
@@ -92,7 +94,7 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
             <button
               key={g}
               onClick={() => setSelectedGenre(g)}
-              className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
+              className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer ${
                 selectedGenre === g
                   ? 'glass-nav-active text-white border border-cyan-400/50 shadow-md'
                   : 'glass-card text-slate-300 hover:text-white border border-white/10 hover:border-white/20'
@@ -131,7 +133,7 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
           {isAdmin && publishedMixes.length === 0 && (
             <button
               onClick={onOpenUpload}
-              className="mt-2 px-5 py-2.5 rounded-full bg-cyan-500 text-slate-950 font-extrabold text-xs uppercase tracking-wider inline-flex items-center gap-2 hover:scale-105 transition"
+              className="mt-2 px-5 py-2.5 rounded-full bg-cyan-500 text-slate-950 font-extrabold text-xs uppercase tracking-wider inline-flex items-center gap-2 hover:scale-105 transition cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
               <span>UPLOAD FIRST LIVE MIX</span>
@@ -166,7 +168,7 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
                           playTrack(mix, 'live');
                         }
                       }}
-                      className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-white/95 hover:bg-white text-slate-950 flex items-center justify-center shadow-2xl transition hover:scale-110 active:scale-95"
+                      className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-white/95 hover:bg-white text-slate-950 flex items-center justify-center shadow-2xl transition hover:scale-110 active:scale-95 cursor-pointer"
                       title={isThisPlaying ? 'Pause' : 'Play live mix'}
                     >
                       {isThisPlaying ? (
@@ -205,30 +207,39 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
                   </div>
                 </div>
 
-                {/* Footer Controls */}
+                {/* Footer Controls: Comments, Likes, Plays, Share */}
                 <div className="px-5 pb-5 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
                   <div className="flex items-center gap-2">
                     <Disc3 className="w-4 h-4 text-cyan-400 animate-spin" />
                     <span className="font-mono text-slate-300">{mix.playsCount} plays</span>
                   </div>
 
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => onLikeMix(mix.id)}
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition active:scale-95 ${
-                          isItemLikedByVisitor('dj_emma_liked_live', mix.id)
-                            ? 'bg-rose-500/25 text-rose-300 border-rose-400/50'
-                            : 'bg-white/5 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border-white/10'
-                        }`}
-                        title={isItemLikedByVisitor('dj_emma_liked_live', mix.id) ? 'Unlike mix' : 'Like this mix'}
-                      >
-                        <Heart className={`w-3.5 h-3.5 ${isItemLikedByVisitor('dj_emma_liked_live', mix.id) ? 'fill-rose-500 text-rose-400' : 'fill-rose-500/30 text-rose-400'}`} />
-                        <span className="font-bold text-white">{mix.likesCount}</span>
-                      </button>
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <button
+                      onClick={() => onOpenComments?.(mix.id, 'live', mix.title)}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-cyan-300 border border-white/10 transition text-xs cursor-pointer"
+                      title="View & post comments"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 text-cyan-400" />
+                      <span className="text-[11px]">Comments</span>
+                    </button>
+
+                    <button
+                      onClick={() => onLikeMix(mix.id)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition active:scale-95 cursor-pointer ${
+                        isItemLikedByVisitor('dj_emma_liked_live', mix.id)
+                          ? 'bg-rose-500/25 text-rose-300 border-rose-400/50'
+                          : 'bg-white/5 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border-white/10'
+                      }`}
+                      title={isItemLikedByVisitor('dj_emma_liked_live', mix.id) ? 'Unlike mix' : 'Like this mix'}
+                    >
+                      <Heart className={`w-3.5 h-3.5 ${isItemLikedByVisitor('dj_emma_liked_live', mix.id) ? 'fill-rose-500 text-rose-400' : 'fill-rose-500/30 text-rose-400'}`} />
+                      <span className="font-bold text-white">{mix.likesCount}</span>
+                    </button>
 
                     <button
                       onClick={() => handleShare(mix)}
-                      className="p-1.5 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition"
+                      className="p-1.5 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer"
                       title="Share mix"
                     >
                       {copiedId === mix.id ? (

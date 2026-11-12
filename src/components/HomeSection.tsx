@@ -12,6 +12,7 @@ interface HomeSectionProps {
   onNavigate: (tab: ActiveTab) => void;
   onLikeMix: (id: string, type: 'live' | 'nonstop') => void;
   onLikeNews: (id: string) => void;
+  onOpenComments?: (id: string, type: 'news' | 'live' | 'nonstop', title: string) => void;
 }
 
 export const HomeSection: React.FC<HomeSectionProps> = ({
@@ -22,6 +23,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
   onNavigate,
   onLikeMix,
   onLikeNews,
+  onOpenComments,
 }) => {
   const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
   const [copiedPostId, setCopiedPostId] = useState<string | null>(null);
@@ -133,8 +135,8 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
                   </div>
                 </div>
 
-                {/* Footer Actions: Like & Share */}
-                <div className="px-5 pb-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+                {/* Footer Actions: Like, Comment & Share */}
+                <div className="px-5 pb-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-400 gap-2">
                   <button
                     onClick={() => onLikeNews(post.id)}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition active:scale-95 ${
@@ -146,9 +148,18 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
                   >
                     <Heart className={`w-3.5 h-3.5 ${isItemLikedByVisitor('dj_emma_liked_news', post.id) ? 'fill-rose-500 text-rose-400' : 'fill-rose-500/30 text-rose-400'}`} />
                     <span className="font-bold text-white">{post.likesCount}</span>
-                    <span className="text-[11px] text-slate-400">
+                    <span className="text-[11px] text-slate-400 hidden xs:inline">
                       {isItemLikedByVisitor('dj_emma_liked_news', post.id) ? 'Liked' : 'Likes'}
                     </span>
+                  </button>
+
+                  <button
+                    onClick={() => onOpenComments?.(post.id, 'news', post.title)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition text-xs"
+                    title="View and post comments"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Comments</span>
                   </button>
 
                   <button
@@ -159,12 +170,12 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
                     {copiedPostId === post.id ? (
                       <>
                         <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="text-emerald-300 text-[11px]">Link Copied!</span>
+                        <span className="text-emerald-300 text-[11px]">Copied!</span>
                       </>
                     ) : (
                       <>
                         <Share2 className="w-3.5 h-3.5" />
-                        <span className="text-[11px]">Share</span>
+                        <span className="text-[11px] hidden xs:inline">Share</span>
                       </>
                     )}
                   </button>
@@ -270,14 +281,25 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
                         {mix.playsCount} plays
                       </span>
 
-                      <button
-                        onClick={() => onLikeMix(mix.id, 'live')}
-                        className="flex items-center gap-1 text-slate-300 hover:text-rose-400 transition"
-                        title="Like this mix"
-                      >
-                        <Heart className="w-3.5 h-3.5 fill-rose-500/40 text-rose-400" />
-                        <span>{mix.likesCount}</span>
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => onOpenComments?.(mix.id, 'live', mix.title)}
+                          className="flex items-center gap-1 text-slate-300 hover:text-cyan-300 transition"
+                          title="Comments"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5 text-cyan-400" />
+                          <span className="text-[11px]">Comments</span>
+                        </button>
+
+                        <button
+                          onClick={() => onLikeMix(mix.id, 'live')}
+                          className="flex items-center gap-1 text-slate-300 hover:text-rose-400 transition"
+                          title="Like this mix"
+                        >
+                          <Heart className="w-3.5 h-3.5 fill-rose-500/40 text-rose-400" />
+                          <span>{mix.likesCount}</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -381,14 +403,25 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
                         {nonstop.playsCount} plays
                       </span>
 
-                      <button
-                        onClick={() => onLikeMix(nonstop.id, 'nonstop')}
-                        className="flex items-center gap-1 text-slate-300 hover:text-rose-400 transition"
-                        title="Like this nonstop"
-                      >
-                        <Heart className="w-3.5 h-3.5 fill-rose-500/40 text-rose-400" />
-                        <span>{nonstop.likesCount}</span>
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => onOpenComments?.(nonstop.id, 'nonstop', nonstop.title)}
+                          className="flex items-center gap-1 text-slate-300 hover:text-purple-300 transition"
+                          title="Comments"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5 text-purple-400" />
+                          <span className="text-[11px]">Comments</span>
+                        </button>
+
+                        <button
+                          onClick={() => onLikeMix(nonstop.id, 'nonstop')}
+                          className="flex items-center gap-1 text-slate-300 hover:text-rose-400 transition"
+                          title="Like this nonstop"
+                        >
+                          <Heart className="w-3.5 h-3.5 fill-rose-500/40 text-rose-400" />
+                          <span>{nonstop.likesCount}</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

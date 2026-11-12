@@ -95,3 +95,12 @@ export interface SupabaseStatus {
 }
 
 export type ActiveTab = 'home' | 'live-mixes' | 'nonstops' | 'about-me' | 'admin';
+
+export interface Comment {
+  id: string;
+  targetId: string;
+  targetType: 'news' | 'live' | 'nonstop';
+  authorName: string;
+  content: string;
+  createdAt: string;
+}

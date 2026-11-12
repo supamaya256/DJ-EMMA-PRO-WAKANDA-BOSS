@@ -11,6 +11,7 @@ import { NonstopsSection } from './components/NonstopsSection';
 import { AboutSection } from './components/AboutSection';
 import { AdminDashboard } from './components/AdminDashboard';
 import { AdminLoginModal } from './components/AdminLoginModal';
+import { CommentsModal } from './components/CommentsModal';
 import { ShieldCheck, ArrowLeft } from 'lucide-react';
 import { getVisitorId, toggleVisitorLikedId } from './lib/visitor';
 import { supabase } from './lib/supabase';
@@ -33,6 +34,28 @@ export default function App() {
   });
 
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  // Global Comments Modal State
+  const [commentsModal, setCommentsModal] = useState<{
+    isOpen: boolean;
+    targetId: string;
+    targetType: 'news' | 'live' | 'nonstop';
+    targetTitle: string;
+  }>({
+    isOpen: false,
+    targetId: '',
+    targetType: 'news',
+    targetTitle: '',
+  });
+
+  const handleOpenComments = (targetId: string, targetType: 'news' | 'live' | 'nonstop', targetTitle: string) => {
+    setCommentsModal({
+      isOpen: true,
+      targetId,
+      targetType,
+      targetTitle,
+    });
+  };
 
   // Core Data States
   const [liveMixes, setLiveMixes] = useState<LiveMix[]>([]);
@@ -311,15 +334,11 @@ export default function App() {
 
             {/* 
               IMAGE 2 MASTER DASHBOARD HERO:
-              Contains purely the original image with transparent clickable overlays
-              positioned directly over HOME, LIVE MIXES, NONSTOPS, ABOUT ME.
+              Preserves DJ EMMA PRO photograph, 3D chrome lettering, and metallic background.
+              Duplicate lower navigation bar is completely removed.
             */}
-            <section className="w-full bg-[#272a31] border-b border-white/10 shadow-2xl">
-              <MainDashboardHeader
-                activeTab={activeTab}
-                onTabChange={handleTabChange}
-                onOpenAdminLogin={() => setIsLoginModalOpen(true)}
-              />
+            <section className="w-full bg-[#24272e] border-b border-white/10 shadow-2xl">
+              <MainDashboardHeader />
             </section>
 
             {/* Content Area Activated by the Navigation Overlays */}
@@ -333,6 +352,7 @@ export default function App() {
                   onNavigate={handleTabChange}
                   onLikeMix={handleLikeMix}
                   onLikeNews={handleLikeNews}
+                  onOpenComments={handleOpenComments}
                 />
               )}
 
@@ -342,6 +362,7 @@ export default function App() {
                   isAdmin={isAdminAuthenticated}
                   onOpenUpload={() => handleTabChange('admin')}
                   onLikeMix={(id) => handleLikeMix(id, 'live')}
+                  onOpenComments={handleOpenComments}
                 />
               )}
 
@@ -351,6 +372,7 @@ export default function App() {
                   isAdmin={isAdminAuthenticated}
                   onOpenUpload={() => handleTabChange('admin')}
                   onLikeNonstop={(id) => handleLikeMix(id, 'nonstop')}
+                  onOpenComments={handleOpenComments}
                 />
               )}
 
@@ -401,6 +423,15 @@ export default function App() {
               isOpen={isLoginModalOpen}
               onClose={() => setIsLoginModalOpen(false)}
               onLoginSuccess={handleLoginSuccess}
+            />
+
+            {/* Public Visitor Comments Modal */}
+            <CommentsModal
+              isOpen={commentsModal.isOpen}
+              onClose={() => setCommentsModal((prev) => ({ ...prev, isOpen: false }))}
+              targetId={commentsModal.targetId}
+              targetType={commentsModal.targetType}
+              targetTitle={commentsModal.targetTitle}
             />
 
             {/* Discreet Bottom Controls (Return to START, Admin Login) */}
