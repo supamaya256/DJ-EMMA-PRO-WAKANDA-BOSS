@@ -316,6 +316,63 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
   });
 });
 
+// Welcoming Voice Audio Endpoint
+app.get('/api/welcome-audio', async (_req, res) => {
+  const localWelcome = path.join(UPLOADS_DIR, 'WELCOME.mp3');
+  if (fs.existsSync(localWelcome)) {
+    return res.sendFile(localWelcome);
+  }
+
+  const candidateUrls = [
+    'https://ruyediepdsvycrxniplt.supabase.co/storage/v1/object/public/DJ%20EMMA%20PRO/WELCOME.mp3',
+    'https://ruyediepdsvycrxniplt.supabase.co/storage/v1/object/public/audio-files/WELCOME.mp3',
+  ];
+
+  for (const candidate of candidateUrls) {
+    try {
+      const resp = await fetch(candidate);
+      if (resp.status === 200) {
+        res.setHeader('Content-Type', resp.headers.get('content-type') || 'audio/mpeg');
+        res.setHeader('Cache-Control', 'public, max-age=3600');
+        const buffer = await resp.arrayBuffer();
+        return res.send(Buffer.from(buffer));
+      }
+    } catch {}
+  }
+
+  return res.redirect('https://ruyediepdsvycrxniplt.supabase.co/storage/v1/object/public/DJ%20EMMA%20PRO/WELCOME.mp3');
+});
+
+app.post('/api/welcome-audio/upload', upload.single('file'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No audio file provided' });
+  }
+
+  const localWelcome = path.join(UPLOADS_DIR, 'WELCOME.mp3');
+  try {
+    fs.copyFileSync(req.file.path, localWelcome);
+  } catch {}
+
+  const supabase = getSupabaseClient();
+  let supabaseUrl = '';
+  if (supabase) {
+    try {
+      const fileBytes = fs.readFileSync(req.file.path);
+      await supabase.storage.from('audio-files').upload('WELCOME.mp3', fileBytes, {
+        contentType: req.file.mimetype || 'audio/mpeg',
+        upsert: true,
+      });
+      supabaseUrl = 'https://ruyediepdsvycrxniplt.supabase.co/storage/v1/object/public/audio-files/WELCOME.mp3';
+    } catch {}
+  }
+
+  return res.json({
+    success: true,
+    message: 'Welcome voice audio updated successfully!',
+    url: supabaseUrl || '/api/welcome-audio',
+  });
+});
+
 // 4. LIVE MIXES API
 app.get('/api/mixes', async (_req, res) => {
   const supabase = getSupabaseClient();

@@ -4,34 +4,48 @@ interface StartScreenProps {
   onStart: () => void;
 }
 
+const SUPABASE_WELCOME_AUDIO_URL =
+  'https://ruyediepdsvycrxniplt.supabase.co/storage/v1/object/public/DJ%20EMMA%20PRO/WELCOME.mp3';
+
 export const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   const handleStartClick = () => {
+    if (isTransitioning) return;
     setIsTransitioning(true);
 
-    // Optional subtle futuristic chime
+    // PLAY WELCOMING VOICE AUDIO:
+    // When anyone taps START, immediately play the welcoming voice from Supabase Storage
     try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.35);
-      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.5);
-    } catch {
-      // Audio context might be restricted, proceed smoothly
+      const welcomeAudio = new Audio(SUPABASE_WELCOME_AUDIO_URL);
+      welcomeAudio.volume = 1.0;
+
+      // Automatic seamless fallback to local/proxy endpoint if Supabase bucket is private
+      welcomeAudio.onerror = () => {
+        console.warn('Direct Supabase welcome audio unreachable, switching to proxy fallback');
+        welcomeAudio.src = '/api/welcome-audio';
+        welcomeAudio.play().catch(() => {});
+      };
+
+      const playPromise = welcomeAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn('Playback error, trying proxy endpoint:', err);
+          welcomeAudio.src = '/api/welcome-audio';
+          welcomeAudio.play().catch(() => {});
+        });
+      }
+
+      // Keep reference alive across page transitions so it plays into the main website
+      (window as any).__djEmmaWelcomeVoice = welcomeAudio;
+    } catch (err) {
+      console.warn('Could not initialize welcome audio:', err);
     }
 
-    // Smooth transition into Image 2
+    // Smooth transition into Image 2 main website dashboard
     setTimeout(() => {
       onStart();
-    }, 500);
+    }, 450);
   };
 
   return (
@@ -69,7 +83,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
             height: '24.5%',
           }}
           aria-label="START"
-          title="START"
+          title="START - Tap to enter and play welcoming voice"
         />
       </div>
     </div>

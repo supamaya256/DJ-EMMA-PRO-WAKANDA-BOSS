@@ -72,6 +72,14 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const playTrack = async (track: LiveMix | NonstopMix, type: 'live' | 'nonstop') => {
     if (!audioRef.current) return;
+    
+    // Stop welcoming voice if it is still playing
+    if ((window as any).__djEmmaWelcomeVoice) {
+      try {
+        (window as any).__djEmmaWelcomeVoice.pause();
+      } catch {}
+    }
+
     const trackWithMeta: CurrentTrack = { ...track, type };
     setCurrentTrack(trackWithMeta);
 
