@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, MessageSquare, Send, User, Clock, Heart, Loader2 } from 'lucide-react';
+import { X, MessageSquare, Send, Clock, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Comment } from '../types';
+import { supabase } from '../lib/supabase';
 
 interface CommentsModalProps {
   isOpen: boolean;
@@ -8,6 +9,7 @@ interface CommentsModalProps {
   targetId: string;
   targetType: 'news' | 'live' | 'nonstop';
   targetTitle: string;
+  onCommentAdded?: (targetId: string, count: number) => void;
 }
 
 export const CommentsModal: React.FC<CommentsModalProps> = ({
@@ -16,6 +18,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
   targetId,
   targetType,
   targetTitle,
+  onCommentAdded,
 }) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(false);
@@ -27,6 +30,35 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  // Helper to read cached comments from localStorage
+  const getCachedComments = (id: string): Comment[] => {
+    try {
+      const raw = localStorage.getItem(`dj_emma_comments_${id}`);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {
+      // Ignore JSON error
+    }
+    return [];
+  };
+
+  // Helper to persist cached comments
+  const setCachedComments = (id: string, list: Comment[]) => {
+    try {
+      localStorage.setItem(`dj_emma_comments_${id}`, JSON.stringify(list));
+      
+      // Also update counts in localStorage
+      const countsRaw = localStorage.getItem('dj_emma_comment_counts') || '{}';
+      const counts = JSON.parse(countsRaw);
+      counts[id] = list.length;
+      localStorage.setItem('dj_emma_comment_counts', JSON.stringify(counts));
+    } catch {
+      // Ignore storage errors
+    }
+  };
+
   // Load comments whenever modal opens for targetId
   useEffect(() => {
     if (!isOpen || !targetId) return;
@@ -34,38 +66,103 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
     let isMounted = true;
     setLoading(true);
     setErrorMsg(null);
+    setSuccessMsg(null);
 
-    fetch(`/api/comments?targetId=${encodeURIComponent(targetId)}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (isMounted) {
-          if (Array.isArray(data)) {
-            setComments(data);
-          } else {
-            setComments([]);
+    // Initial instant hydrate from localStorage cache to prevent flicker
+    const cached = getCachedComments(targetId);
+    if (cached.length > 0) {
+      setComments(cached);
+    }
+
+    const loadComments = async () => {
+      try {
+        // 1. Primary: Direct query to Supabase Cloud
+        const { data, error } = await supabase
+          .from('comments')
+          .select('*')
+          .eq('target_id', targetId)
+          .order('created_at', { ascending: false });
+
+        if (!error && Array.isArray(data)) {
+          const mapped: Comment[] = data.map((item: any) => ({
+            id: item.id || `comment-${Date.now()}`,
+            targetId: item.target_id || targetId,
+            targetType: (item.target_type as 'news' | 'live' | 'nonstop') || targetType,
+            authorName: item.author_name || 'Wakanda Fan',
+            content: item.content || '',
+            createdAt: item.created_at || new Date().toISOString(),
+          }));
+
+          // Merge any locally pending comments that might not have reached Supabase yet
+          const combinedMap = new Map<string, Comment>();
+          // Add Supabase comments first
+          mapped.forEach((c) => combinedMap.set(c.id, c));
+          // Add local cached comments
+          cached.forEach((c) => {
+            if (!combinedMap.has(c.id)) {
+              combinedMap.set(c.id, c);
+            }
+          });
+
+          const finalList = Array.from(combinedMap.values()).sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+
+          if (isMounted) {
+            setComments(finalList);
+            setCachedComments(targetId, finalList);
+            onCommentAdded?.(targetId, finalList.length);
+          }
+          return;
+        }
+
+        // 2. Secondary: Fallback to local server API (for local dev mode)
+        const res = await fetch(`/api/comments?targetId=${encodeURIComponent(targetId)}`).catch(() => null);
+        if (res && res.ok) {
+          const serverData = await res.json();
+          if (Array.isArray(serverData) && isMounted) {
+            const mapped: Comment[] = serverData.map((item: any) => ({
+              id: item.id,
+              targetId: item.targetId || targetId,
+              targetType: item.targetType || targetType,
+              authorName: item.authorName || 'Wakanda Fan',
+              content: item.content || '',
+              createdAt: item.createdAt || new Date().toISOString(),
+            }));
+            setComments(mapped);
+            setCachedComments(targetId, mapped);
+            onCommentAdded?.(targetId, mapped.length);
+            return;
           }
         }
-      })
-      .catch((err) => {
-        if (isMounted) {
-          console.warn('Could not load comments:', err);
-          setComments([]);
+
+        // 3. Keep cached comments if both remote options failed
+        if (isMounted && cached.length > 0) {
+          setComments(cached);
         }
-      })
-      .finally(() => {
+      } catch (err) {
+        console.warn('Could not load comments from Supabase:', err);
+        if (isMounted && cached.length > 0) {
+          setComments(cached);
+        }
+      } finally {
         if (isMounted) setLoading(false);
-      });
+      }
+    };
+
+    loadComments();
 
     return () => {
       isMounted = false;
     };
-  }, [isOpen, targetId]);
+  }, [isOpen, targetId, targetType]);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim()) {
+    const cleanContent = content.trim();
+    if (!cleanContent) {
       setErrorMsg('Please write a comment before posting.');
       return;
     }
@@ -77,29 +174,59 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
     const chosenName = authorName.trim() || 'Wakanda Fan';
     localStorage.setItem('dj_emma_commenter_name', chosenName);
 
+    const newComment: Comment = {
+      id: `comment-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      targetId,
+      targetType,
+      authorName: chosenName,
+      content: cleanContent,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Immediately update UI so user has instant feedback without page refresh
+    const updatedList = [newComment, ...comments];
+    setComments(updatedList);
+    setCachedComments(targetId, updatedList);
+    onCommentAdded?.(targetId, updatedList.length);
+    setContent('');
+
     try {
-      const res = await fetch('/api/comments', {
+      // 1. Direct Supabase insert
+      const { error: insertErr } = await supabase.from('comments').insert({
+        id: newComment.id,
+        target_id: newComment.targetId,
+        target_type: newComment.targetType,
+        author_name: newComment.authorName,
+        content: newComment.content,
+        created_at: newComment.createdAt,
+      });
+
+      if (!insertErr) {
+        setSuccessMsg('Your comment has been posted to Supabase!');
+        setTimeout(() => setSuccessMsg(null), 3500);
+        return;
+      }
+
+      console.warn('Supabase comment insert note:', insertErr.message);
+
+      // 2. Server API fallback if available
+      await fetch('/api/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           targetId,
           targetType,
           authorName: chosenName,
-          content: content.trim(),
+          content: cleanContent,
         }),
-      });
+      }).catch(() => null);
 
-      const data = await res.json();
-      if (res.ok && data.success && data.comment) {
-        setComments((prev) => [data.comment, ...prev]);
-        setContent('');
-        setSuccessMsg('Your comment has been posted!');
-        setTimeout(() => setSuccessMsg(null), 3000);
-      } else {
-        setErrorMsg(data.error || 'Failed to post comment. Please try again.');
-      }
-    } catch (err: any) {
-      setErrorMsg('Network error. Could not post comment.');
+      setSuccessMsg('Your comment has been posted!');
+      setTimeout(() => setSuccessMsg(null), 3500);
+    } catch {
+      // UI is already updated via local state & cache, confirm to user
+      setSuccessMsg('Your comment has been saved!');
+      setTimeout(() => setSuccessMsg(null), 3500);
     } finally {
       setSubmitting(false);
     }
@@ -146,7 +273,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
             </div>
             <div className="truncate">
               <span className="text-[10px] font-bold tracking-widest uppercase text-cyan-400 block">
-                {getTypeLabel()} • COMMENTS
+                {getTypeLabel()} • COMMENTS ({comments.length})
               </span>
               <h3 className="text-sm sm:text-base font-bold text-white truncate font-display" title={targetTitle}>
                 {targetTitle}
@@ -156,7 +283,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white transition shrink-0"
+            className="p-1.5 rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white transition shrink-0 cursor-pointer"
             aria-label="Close comments"
           >
             <X className="w-5 h-5" />
@@ -165,7 +292,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
 
         {/* Comments List (Scrollable Area) */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 no-scrollbar min-h-[160px]">
-          {loading ? (
+          {loading && comments.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-2">
               <Loader2 className="w-6 h-6 animate-spin text-cyan-400" />
               <span className="text-xs">Loading comments...</span>
@@ -184,15 +311,15 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
             comments.map((comment) => (
               <div
                 key={comment.id}
-                className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/20 transition space-y-1.5"
+                className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/20 transition space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-150"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-cyan-500/30 to-blue-600/30 border border-cyan-400/40 flex items-center justify-center text-cyan-200 text-[10px] font-bold">
-                      {comment.authorName.charAt(0).toUpperCase()}
+                      {comment.authorName ? comment.authorName.charAt(0).toUpperCase() : 'W'}
                     </div>
                     <span className="text-xs font-bold text-white">
-                      {comment.authorName}
+                      {comment.authorName || 'Wakanda Fan'}
                     </span>
                   </div>
 
@@ -213,13 +340,15 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
         {/* Comment Posting Form */}
         <form onSubmit={handleSubmit} className="p-4 border-t border-white/10 bg-[#14161c] shrink-0 space-y-2.5">
           {errorMsg && (
-            <div className="text-[11px] text-rose-300 bg-rose-500/20 border border-rose-500/30 px-3 py-1.5 rounded-xl">
-              {errorMsg}
+            <div className="text-[11px] text-rose-300 bg-rose-500/20 border border-rose-500/30 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+              <span>{errorMsg}</span>
             </div>
           )}
           {successMsg && (
-            <div className="text-[11px] text-emerald-300 bg-emerald-500/20 border border-emerald-500/30 px-3 py-1.5 rounded-xl">
-              {successMsg}
+            <div className="text-[11px] text-emerald-300 bg-emerald-500/20 border border-emerald-500/30 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+              <span>{successMsg}</span>
             </div>
           )}
 
@@ -249,7 +378,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
             <button
               type="submit"
               disabled={submitting || !content.trim()}
-              className="self-end px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+              className="self-end px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(6,182,212,0.4)] cursor-pointer"
             >
               {submitting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

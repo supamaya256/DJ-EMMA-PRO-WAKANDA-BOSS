@@ -228,6 +228,18 @@ GRANT EXECUTE ON FUNCTION public.toggle_post_like(TEXT, TEXT) TO anon, authentic
 GRANT EXECUTE ON FUNCTION public.toggle_mix_like(TEXT, TEXT, TEXT) TO anon, authenticated;
 
 -- ------------------------------------------------------------------------------
+-- 4B. COMMENTS TABLE (PUBLIC VISITOR COMMENTS SYSTEM - PERMANENT PERSISTENCE)
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.comments (
+  id TEXT PRIMARY KEY DEFAULT ('comment-' || floor(extract(epoch from now()) * 1000)::text || '-' || substr(md5(random()::text), 1, 6)),
+  target_id TEXT NOT NULL,
+  target_type TEXT NOT NULL CHECK (target_type IN ('news', 'live', 'nonstop')),
+  author_name TEXT NOT NULL DEFAULT 'Wakanda Fan',
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ------------------------------------------------------------------------------
 -- 5. PERFORMANCE INDEXES
 -- ------------------------------------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_news_published_created ON public.news_posts (is_published, created_at DESC);
@@ -235,6 +247,7 @@ CREATE INDEX IF NOT EXISTS idx_live_published_created ON public.live_mixes (is_p
 CREATE INDEX IF NOT EXISTS idx_nonstop_published_created ON public.nonstop_mixes (is_published, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_post_likes_lookup ON public.post_likes (post_id, visitor_id);
 CREATE INDEX IF NOT EXISTS idx_mix_likes_lookup ON public.mix_likes (mix_id, visitor_id);
+CREATE INDEX IF NOT EXISTS idx_comments_target_created ON public.comments (target_id, created_at DESC);
 
 -- ------------------------------------------------------------------------------
 -- 6. UPDATED_AT TRIGGERS
@@ -362,6 +375,20 @@ CREATE POLICY "Public insert mix likes" ON public.mix_likes FOR INSERT WITH CHEC
 
 DROP POLICY IF EXISTS "Public delete mix likes" ON public.mix_likes;
 CREATE POLICY "Public delete mix likes" ON public.mix_likes FOR DELETE USING (true);
+
+-- COMMENTS TABLE: Everyone can read and post; Admins can delete
+ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public read comments" ON public.comments;
+CREATE POLICY "Public read comments" ON public.comments FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public insert comments" ON public.comments;
+CREATE POLICY "Public insert comments" ON public.comments FOR INSERT WITH CHECK (
+  char_length(trim(content)) > 0 AND char_length(content) <= 500
+);
+
+DROP POLICY IF EXISTS "Admin delete comments" ON public.comments;
+CREATE POLICY "Admin delete comments" ON public.comments FOR DELETE USING (public.is_admin());
 
 -- ------------------------------------------------------------------------------
 -- 8. SUPABASE STORAGE BUCKETS & POLICIES

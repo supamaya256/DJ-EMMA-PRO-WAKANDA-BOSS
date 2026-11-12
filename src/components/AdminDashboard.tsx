@@ -68,6 +68,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // Welcome Audio State
   const [isPlayingWelcome, setIsPlayingWelcome] = useState(false);
   const [copiedWelcomeSql, setCopiedWelcomeSql] = useState(false);
+  const [copiedCommentsSql, setCopiedCommentsSql] = useState(false);
   const [uploadingWelcome, setUploadingWelcome] = useState(false);
   const welcomeTestAudioRef = React.useRef<HTMLAudioElement | null>(null);
 
@@ -892,14 +893,25 @@ $$;
 GRANT EXECUTE ON FUNCTION public.toggle_post_like(TEXT, TEXT) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.toggle_mix_like(TEXT, TEXT, TEXT) TO anon, authenticated;
 
--- 4. PERFORMANCE INDEXES
+-- 4. PUBLIC VISITOR COMMENTS TABLE
+CREATE TABLE IF NOT EXISTS public.comments (
+  id TEXT PRIMARY KEY DEFAULT ('comment-' || floor(extract(epoch from now()) * 1000)::text || '-' || substr(md5(random()::text), 1, 6)),
+  target_id TEXT NOT NULL,
+  target_type TEXT NOT NULL CHECK (target_type IN ('news', 'live', 'nonstop')),
+  author_name TEXT NOT NULL DEFAULT 'Wakanda Fan',
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 5. PERFORMANCE INDEXES
 CREATE INDEX IF NOT EXISTS idx_news_published_created ON public.news_posts (is_published, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_live_published_created ON public.live_mixes (is_published, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_nonstop_published_created ON public.nonstop_mixes (is_published, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_post_likes_lookup ON public.post_likes (post_id, visitor_id);
 CREATE INDEX IF NOT EXISTS idx_mix_likes_lookup ON public.mix_likes (mix_id, visitor_id);
+CREATE INDEX IF NOT EXISTS idx_comments_target_created ON public.comments (target_id, created_at DESC);
 
--- 5. UPDATED_AT TRIGGERS
+-- 6. UPDATED_AT TRIGGERS
 DROP TRIGGER IF EXISTS trg_live_mixes_updated ON public.live_mixes;
 CREATE TRIGGER trg_live_mixes_updated BEFORE UPDATE ON public.live_mixes FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
@@ -912,7 +924,7 @@ CREATE TRIGGER trg_news_posts_updated BEFORE UPDATE ON public.news_posts FOR EAC
 DROP TRIGGER IF EXISTS trg_artist_info_updated ON public.artist_info;
 CREATE TRIGGER trg_artist_info_updated BEFORE UPDATE ON public.artist_info FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
--- 6. ROW LEVEL SECURITY (RLS) POLICIES
+-- 7. ROW LEVEL SECURITY (RLS) POLICIES
 ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.live_mixes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nonstop_mixes ENABLE ROW LEVEL SECURITY;
@@ -921,6 +933,7 @@ ALTER TABLE public.artist_info ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.homepage_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.post_likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.mix_likes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Public read published live mixes" ON public.live_mixes;
 CREATE POLICY "Public read published live mixes" ON public.live_mixes FOR SELECT USING (is_published = true OR public.is_admin());
@@ -988,7 +1001,18 @@ CREATE POLICY "Public insert mix likes" ON public.mix_likes FOR INSERT WITH CHEC
 DROP POLICY IF EXISTS "Public delete mix likes" ON public.mix_likes;
 CREATE POLICY "Public delete mix likes" ON public.mix_likes FOR DELETE USING (true);
 
--- 7. SUPABASE STORAGE BUCKETS & POLICIES
+DROP POLICY IF EXISTS "Public read comments" ON public.comments;
+CREATE POLICY "Public read comments" ON public.comments FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public insert comments" ON public.comments;
+CREATE POLICY "Public insert comments" ON public.comments FOR INSERT WITH CHECK (
+  char_length(trim(content)) > 0 AND char_length(content) <= 500
+);
+
+DROP POLICY IF EXISTS "Admin delete comments" ON public.comments;
+CREATE POLICY "Admin delete comments" ON public.comments FOR DELETE USING (public.is_admin());
+
+-- 8. SUPABASE STORAGE BUCKETS & POLICIES
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES 
   ('audio-files', 'audio-files', true, 524288000, ARRAY['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/aac', 'audio/ogg', 'audio/x-m4a']),
@@ -1018,6 +1042,41 @@ CREATE POLICY "Admin can delete storage files" ON storage.objects
     navigator.clipboard?.writeText(sql);
     setCopiedSql(true);
     setTimeout(() => setCopiedSql(false), 2500);
+  };
+
+  const copyCommentsSql = () => {
+    const sql = `-- ==============================================================================
+-- DJ EMMA PRO | THE WAKANDA BOSS - COMMENTS TABLE & ROW LEVEL SECURITY (RLS)
+-- Run this in Supabase SQL Editor: https://supabase.com/dashboard/project/ruyediepdsvycrxniplt/sql/new
+-- ==============================================================================
+
+CREATE TABLE IF NOT EXISTS public.comments (
+  id TEXT PRIMARY KEY DEFAULT ('comment-' || floor(extract(epoch from now()) * 1000)::text || '-' || substr(md5(random()::text), 1, 6)),
+  target_id TEXT NOT NULL,
+  target_type TEXT NOT NULL CHECK (target_type IN ('news', 'live', 'nonstop')),
+  author_name TEXT NOT NULL DEFAULT 'Wakanda Fan',
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_comments_target_created ON public.comments (target_id, created_at DESC);
+
+ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public read comments" ON public.comments;
+CREATE POLICY "Public read comments" ON public.comments FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public insert comments" ON public.comments;
+CREATE POLICY "Public insert comments" ON public.comments FOR INSERT WITH CHECK (
+  char_length(trim(content)) > 0 AND char_length(content) <= 500
+);
+
+DROP POLICY IF EXISTS "Admin delete comments" ON public.comments;
+CREATE POLICY "Admin delete comments" ON public.comments FOR DELETE USING (public.is_admin());
+`;
+    navigator.clipboard?.writeText(sql);
+    setCopiedCommentsSql(true);
+    setTimeout(() => setCopiedCommentsSql(false), 2500);
   };
 
   return (
@@ -2242,7 +2301,26 @@ CREATE POLICY "Admin can delete storage files" ON storage.objects
                     Click copy, paste into the Supabase SQL editor, and click <span className="font-bold text-white">RUN</span> to establish cloud tables in your project.
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={copyCommentsSql}
+                    className="px-3.5 py-2 rounded-full bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-400/40 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+                    title="Copy only the comments table SQL"
+                  >
+                    {copiedCommentsSql ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Comments SQL Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Copy Comments SQL</span>
+                      </>
+                    )}
+                  </button>
+
                   <button
                     type="button"
                     onClick={copySqlSchema}

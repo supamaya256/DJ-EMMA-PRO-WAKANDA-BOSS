@@ -10,6 +10,7 @@ interface LiveMixesSectionProps {
   onOpenUpload: () => void;
   onLikeMix: (id: string) => void;
   onOpenComments?: (id: string, type: 'live', title: string) => void;
+  commentCounts?: Record<string, number>;
 }
 
 export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
@@ -18,6 +19,7 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
   onOpenUpload,
   onLikeMix,
   onOpenComments,
+  commentCounts = {},
 }) => {
   const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
   const [searchQuery, setSearchQuery] = useState('');
@@ -221,7 +223,7 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
                       title="View & post comments"
                     >
                       <MessageSquare className="w-3.5 h-3.5 text-cyan-400" />
-                      <span className="text-[11px]">Comments</span>
+                      <span className="text-[11px]">Comments {commentCounts[mix.id] ? `(${commentCounts[mix.id]})` : ''}</span>
                     </button>
 
                     <button

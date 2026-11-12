@@ -14,9 +14,10 @@ export const GlobalAudioPlayer: React.FC = () => {
     seek,
     setVolume,
     toggleMute,
-    pauseTrack,
+    closePlayer,
   } = useAudio();
 
+  // If no track is selected or user closed the player, do not render anything
   if (!currentTrack) return null;
 
   const formatTime = (secs: number) => {
@@ -42,156 +43,171 @@ export const GlobalAudioPlayer: React.FC = () => {
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-2 sm:p-4 pointer-events-auto">
-      <div className="max-w-6xl mx-auto rounded-2xl glass-nav-bar p-3 sm:p-4 text-white shadow-2xl border border-white/20 relative backdrop-blur-xl">
-        {/* Top Slim Progress Bar */}
-        <div className="relative w-full h-1.5 bg-white/10 rounded-full mb-3 cursor-pointer overflow-hidden group">
-          <div
-            className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-400 via-sky-300 to-white shadow-[0_0_10px_#38bdf8]"
-            style={{ width: `${progressPercent}%` }}
-          />
-          <input
-            type="range"
-            min={0}
-            max={duration || 100}
-            value={currentTime}
-            onChange={handleSeekChange}
-            aria-label="Audio progress seek bar"
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          />
-        </div>
-
-        <div className="flex items-center justify-between gap-3 sm:gap-6">
-          {/* Track Info */}
-          <div className="flex items-center gap-3 min-w-0 max-w-[40%] sm:max-w-xs">
-            <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden shrink-0 border border-white/30 shadow-md">
-              <img
-                src={currentTrack.coverUrl}
-                alt={currentTrack.title}
-                className="w-full h-full object-cover"
-              />
-              {isPlaying && (
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <div className="flex items-end gap-0.5 h-4">
-                    <span className="w-1 bg-cyan-400 animate-pulse h-2" />
-                    <span className="w-1 bg-sky-300 animate-pulse h-4" />
-                    <span className="w-1 bg-cyan-400 animate-pulse h-3" />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                  {currentTrack.type === 'live' ? (
-                    <>
-                      <Radio className="w-2.5 h-2.5 mr-1 animate-pulse text-red-400" /> LIVE MIX
-                    </>
-                  ) : (
-                    <>
-                      <Music2 className="w-2.5 h-2.5 mr-1 text-cyan-300" /> NONSTOP
-                    </>
-                  )}
-                </span>
-              </div>
-              <h4 className="text-xs sm:text-sm font-bold text-white truncate drop-shadow">
-                {currentTrack.title}
-              </h4>
-              <p className="text-[11px] text-slate-300 truncate hidden sm:block">
-                DJ EMMA PRO • {currentTrack.genre}
-              </p>
-            </div>
-          </div>
-
-          {/* Central Controls */}
-          <div className="flex flex-col items-center gap-1">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <button
-                onClick={() => handleSkip(-10)}
-                title="Rewind 10 seconds"
-                className="text-slate-300 hover:text-white p-1 transition"
-              >
-                <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-
-              <button
-                onClick={togglePlay}
-                title={isPlaying ? 'Pause' : 'Play'}
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-b from-white to-slate-200 text-slate-900 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition border border-white/60"
-              >
-                {isPlaying ? (
-                  <Pause className="w-5 h-5 fill-slate-900" />
-                ) : (
-                  <Play className="w-5 h-5 fill-slate-900 ml-0.5" />
-                )}
-              </button>
-
-              <button
-                onClick={() => handleSkip(10)}
-                title="Forward 10 seconds"
-                className="text-slate-300 hover:text-white p-1 transition"
-              >
-                <RotateCw className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            </div>
-
-            <div className="text-[10px] sm:text-xs text-slate-300 font-mono flex items-center gap-1">
-              <span>{formatTime(currentTime)}</span>
-              <span>/</span>
-              <span>{formatTime(duration || 0)}</span>
-            </div>
-          </div>
-
-          {/* Right Volume & Actions */}
-          <div className="flex items-center gap-2 sm:gap-4">
-            <div className="hidden md:flex items-center gap-2">
-              <button
-                onClick={toggleMute}
-                className="text-slate-300 hover:text-white p-1 transition"
-                title={isMuted ? 'Unmute' : 'Mute'}
-              >
-                {isMuted || volume === 0 ? (
-                  <VolumeX className="w-4 h-4 text-red-400" />
-                ) : (
-                  <Volume2 className="w-4 h-4" />
-                )}
-              </button>
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step={0.01}
-                value={isMuted ? 0 : volume}
-                onChange={(e) => setVolume(parseFloat(e.target.value))}
-                aria-label="Volume control"
-                className="w-16 lg:w-24 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
-              />
-            </div>
-
-            {currentTrack.audioUrl && (
-              <a
-                href={currentTrack.audioUrl}
-                download
-                target="_blank"
-                rel="noreferrer"
-                title="Download Mix"
-                className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition border border-white/20"
-              >
-                <Download className="w-4 h-4" />
-              </a>
-            )}
-
-            <button
-              onClick={pauseTrack}
-              title="Pause playback"
-              className="text-slate-400 hover:text-white p-1 transition"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+    <aside 
+      className="fixed bottom-0 left-0 right-0 z-50 bg-[#12141a]/95 backdrop-blur-xl border-t border-white/20 shadow-[0_-8px_32px_rgba(0,0,0,0.9)] select-none animate-in slide-in-from-bottom-2 duration-200"
+      aria-label="DJ EMMA PRO Floating Audio Player"
+    >
+      {/* Top Slim Scrub / Progress Bar */}
+      <div className="relative w-full h-1 sm:h-1.5 bg-white/10 hover:h-2 transition-all cursor-pointer overflow-hidden group">
+        <div
+          className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-400 via-sky-300 to-white shadow-[0_0_12px_#38bdf8]"
+          style={{ width: `${progressPercent}%` }}
+        />
+        <input
+          type="range"
+          min={0}
+          max={duration || 100}
+          value={currentTime}
+          onChange={handleSeekChange}
+          aria-label="Seek track position"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
       </div>
-    </div>
+
+      {/* Compact Main Player Content Row */}
+      <div className="max-w-7xl mx-auto px-2.5 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between gap-2 sm:gap-4">
+        
+        {/* LEFT: Compact Song Cover & Title */}
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial max-w-[45%] sm:max-w-xs md:max-w-sm">
+          <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-lg overflow-hidden shrink-0 border border-white/30 shadow-md bg-slate-900">
+            <img
+              src={currentTrack.coverUrl}
+              alt={currentTrack.title}
+              className="w-full h-full object-cover"
+            />
+            {isPlaying && (
+              <div className="absolute inset-0 bg-black/45 flex items-center justify-center">
+                <div className="flex items-end gap-0.5 h-3.5">
+                  <span className="w-0.5 sm:w-1 bg-cyan-400 animate-pulse h-2" />
+                  <span className="w-0.5 sm:w-1 bg-sky-300 animate-pulse h-3.5" />
+                  <span className="w-0.5 sm:w-1 bg-cyan-400 animate-pulse h-2.5" />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="min-w-0 leading-tight">
+            <div className="flex items-center gap-1.5">
+              <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                {currentTrack.type === 'live' ? (
+                  <>
+                    <Radio className="w-2.5 h-2.5 mr-1 text-red-400 animate-pulse" />
+                    LIVE
+                  </>
+                ) : (
+                  <>
+                    <Music2 className="w-2.5 h-2.5 mr-1 text-purple-300" />
+                    NONSTOP
+                  </>
+                )}
+              </span>
+              <span className="text-[10px] text-slate-400 font-mono hidden md:inline truncate">
+                {currentTrack.genre}
+              </span>
+            </div>
+
+            <h4 className="text-xs sm:text-sm font-bold text-white truncate drop-shadow-sm mt-0.5" title={currentTrack.title}>
+              {currentTrack.title}
+            </h4>
+          </div>
+        </div>
+
+        {/* CENTER: Compact Play/Pause & Skip Controls */}
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          <button
+            onClick={() => handleSkip(-10)}
+            title="Rewind 10 seconds"
+            className="p-1 sm:p-1.5 text-slate-300 hover:text-white transition active:scale-90 cursor-pointer"
+            aria-label="Rewind 10 seconds"
+          >
+            <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </button>
+
+          <button
+            onClick={togglePlay}
+            title={isPlaying ? 'Pause' : 'Play'}
+            aria-label={isPlaying ? 'Pause playback' : 'Start playback'}
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition border border-white/60 cursor-pointer"
+          >
+            {isPlaying ? (
+              <Pause className="w-4 h-4 fill-slate-950" />
+            ) : (
+              <Play className="w-4 h-4 fill-slate-950 ml-0.5" />
+            )}
+          </button>
+
+          <button
+            onClick={() => handleSkip(10)}
+            title="Forward 10 seconds"
+            className="p-1 sm:p-1.5 text-slate-300 hover:text-white transition active:scale-90 cursor-pointer"
+            aria-label="Forward 10 seconds"
+          >
+            <RotateCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </button>
+
+          {/* Time Counter */}
+          <div className="text-[10px] sm:text-xs text-slate-300 font-mono hidden xs:flex items-center gap-1 ml-1 sm:ml-2">
+            <span className="text-white font-semibold">{formatTime(currentTime)}</span>
+            <span className="text-slate-500">/</span>
+            <span>{formatTime(duration || 0)}</span>
+          </div>
+        </div>
+
+        {/* RIGHT: Volume Slider, Download & Functional Close (X) Button */}
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          {/* Volume Control on Desktop */}
+          <div className="hidden lg:flex items-center gap-1.5">
+            <button
+              onClick={toggleMute}
+              className="text-slate-300 hover:text-white p-1 transition cursor-pointer"
+              title={isMuted ? 'Unmute' : 'Mute'}
+              aria-label={isMuted ? 'Unmute' : 'Mute'}
+            >
+              {isMuted || volume === 0 ? (
+                <VolumeX className="w-3.5 h-3.5 text-rose-400" />
+              ) : (
+                <Volume2 className="w-3.5 h-3.5" />
+              )}
+            </button>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={isMuted ? 0 : volume}
+              onChange={(e) => setVolume(parseFloat(e.target.value))}
+              aria-label="Volume slider"
+              className="w-16 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+            />
+          </div>
+
+          {/* Download Mix Link */}
+          {currentTrack.audioUrl && (
+            <a
+              href={currentTrack.audioUrl}
+              download
+              target="_blank"
+              rel="noreferrer"
+              title="Download Mix"
+              className="hidden sm:flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white transition border border-white/10"
+              aria-label="Download audio mix"
+            >
+              <Download className="w-3.5 h-3.5" />
+            </a>
+          )}
+
+          {/* Functional Close (X) Button */}
+          <button
+            onClick={closePlayer}
+            title="Close audio player and stop playback"
+            aria-label="Close audio player"
+            className="w-7 h-7 rounded-full bg-white/5 hover:bg-rose-500/30 text-slate-400 hover:text-rose-300 flex items-center justify-center transition border border-white/10 hover:border-rose-400/30 cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+      </div>
+    </aside>
   );
 };

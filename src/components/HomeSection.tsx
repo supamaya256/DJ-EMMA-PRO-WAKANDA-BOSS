@@ -13,6 +13,7 @@ interface HomeSectionProps {
   onLikeMix: (id: string, type: 'live' | 'nonstop') => void;
   onLikeNews: (id: string) => void;
   onOpenComments?: (id: string, type: 'news' | 'live' | 'nonstop', title: string) => void;
+  commentCounts?: Record<string, number>;
 }
 
 export const HomeSection: React.FC<HomeSectionProps> = ({
@@ -24,6 +25,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
   onLikeMix,
   onLikeNews,
   onOpenComments,
+  commentCounts = {},
 }) => {
   const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
   const [copiedPostId, setCopiedPostId] = useState<string | null>(null);
@@ -155,11 +157,11 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
 
                   <button
                     onClick={() => onOpenComments?.(post.id, 'news', post.title)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition text-xs"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition text-xs cursor-pointer"
                     title="View and post comments"
                   >
                     <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Comments</span>
+                    <span>Comments {commentCounts[post.id] ? `(${commentCounts[post.id]})` : ''}</span>
                   </button>
 
                   <button
@@ -284,11 +286,11 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => onOpenComments?.(mix.id, 'live', mix.title)}
-                          className="flex items-center gap-1 text-slate-300 hover:text-cyan-300 transition"
+                          className="flex items-center gap-1 text-slate-300 hover:text-cyan-300 transition cursor-pointer"
                           title="Comments"
                         >
                           <MessageSquare className="w-3.5 h-3.5 text-cyan-400" />
-                          <span className="text-[11px]">Comments</span>
+                          <span className="text-[11px]">Comments {commentCounts[mix.id] ? `(${commentCounts[mix.id]})` : ''}</span>
                         </button>
 
                         <button
@@ -406,11 +408,11 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => onOpenComments?.(nonstop.id, 'nonstop', nonstop.title)}
-                          className="flex items-center gap-1 text-slate-300 hover:text-purple-300 transition"
+                          className="flex items-center gap-1 text-slate-300 hover:text-purple-300 transition cursor-pointer"
                           title="Comments"
                         >
                           <MessageSquare className="w-3.5 h-3.5 text-purple-400" />
-                          <span className="text-[11px]">Comments</span>
+                          <span className="text-[11px]">Comments {commentCounts[nonstop.id] ? `(${commentCounts[nonstop.id]})` : ''}</span>
                         </button>
 
                         <button

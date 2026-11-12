@@ -10,6 +10,7 @@ interface NonstopsSectionProps {
   onOpenUpload: () => void;
   onLikeNonstop: (id: string) => void;
   onOpenComments?: (id: string, type: 'nonstop', title: string) => void;
+  commentCounts?: Record<string, number>;
 }
 
 export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
@@ -18,6 +19,7 @@ export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
   onOpenUpload,
   onLikeNonstop,
   onOpenComments,
+  commentCounts = {},
 }) => {
   const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
   const [searchQuery, setSearchQuery] = useState('');
@@ -231,7 +233,7 @@ export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
                       title="View & post comments"
                     >
                       <MessageSquare className="w-3.5 h-3.5 text-purple-400" />
-                      <span className="text-[11px]">Comments</span>
+                      <span className="text-[11px]">Comments {commentCounts[nonstop.id] ? `(${commentCounts[nonstop.id]})` : ''}</span>
                     </button>
 
                     <button

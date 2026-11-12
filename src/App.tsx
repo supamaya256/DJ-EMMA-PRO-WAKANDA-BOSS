@@ -61,6 +61,14 @@ export default function App() {
   const [liveMixes, setLiveMixes] = useState<LiveMix[]>([]);
   const [nonstops, setNonstops] = useState<NonstopMix[]>([]);
   const [newsPosts, setNewsPosts] = useState<NewsPost[]>([]);
+  const [commentCounts, setCommentCounts] = useState<Record<string, number>>(() => {
+    try {
+      const raw = localStorage.getItem('dj_emma_comment_counts');
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
   const [artist, setArtist] = useState<ArtistInfo>({
     id: 'dj_emma_pro',
     stageName: 'DJ EMMA PRO',
@@ -191,6 +199,49 @@ export default function App() {
           featuredMixId: homeRes.data.featured_mix_id || prev.featuredMixId,
         }));
       }
+
+      // 2. Fetch public comment counts from Supabase Cloud
+      try {
+        const { data: commentsData } = await supabase.from('comments').select('target_id');
+        const counts: Record<string, number> = {};
+        if (Array.isArray(commentsData)) {
+          commentsData.forEach((c: any) => {
+            if (c.target_id) counts[c.target_id] = (counts[c.target_id] || 0) + 1;
+          });
+        }
+        const localCountsRaw = localStorage.getItem('dj_emma_comment_counts');
+        if (localCountsRaw) {
+          try {
+            const localCounts = JSON.parse(localCountsRaw);
+            Object.assign(counts, { ...localCounts, ...counts });
+          } catch {}
+        }
+        setCommentCounts(counts);
+      } catch {
+        // Safe fallback to local cache
+      }
+
+      // 3. Synchronize this visitor's like status from Supabase Cloud
+      try {
+        const visitorId = getVisitorId();
+        const [postLikesRes, mixLikesRes] = await Promise.all([
+          supabase.from('post_likes').select('post_id').eq('visitor_id', visitorId),
+          supabase.from('mix_likes').select('mix_id, mix_type').eq('visitor_id', visitorId),
+        ]);
+
+        if (Array.isArray(postLikesRes.data)) {
+          const ids = postLikesRes.data.map((r: any) => r.post_id);
+          localStorage.setItem('dj_emma_liked_news', JSON.stringify(ids));
+        }
+        if (Array.isArray(mixLikesRes.data)) {
+          const liveIds = mixLikesRes.data.filter((r: any) => r.mix_type === 'live').map((r: any) => r.mix_id);
+          const nonstopIds = mixLikesRes.data.filter((r: any) => r.mix_type === 'nonstop').map((r: any) => r.mix_id);
+          if (liveIds.length > 0) localStorage.setItem('dj_emma_liked_live', JSON.stringify(liveIds));
+          if (nonstopIds.length > 0) localStorage.setItem('dj_emma_liked_nonstops', JSON.stringify(nonstopIds));
+        }
+      } catch {
+        // Safe fallback
+      }
     } catch (err) {
       console.warn('Supabase data loading warning:', err);
     }
@@ -260,48 +311,105 @@ export default function App() {
   const handleLikeMix = async (id: string, type: 'live' | 'nonstop') => {
     try {
       const visitorId = getVisitorId();
+
+      // 1. Direct Supabase Cloud RPC (Atomic, duplicate-preventing, works directly on Netlify)
+      const { data, error } = await supabase.rpc('toggle_mix_like', {
+        p_mix_id: id,
+        p_mix_type: type,
+        p_visitor_id: visitorId,
+      });
+
+      if (!error && data && typeof data.liked === 'boolean') {
+        const storageKey = type === 'live' ? 'dj_emma_liked_live' : 'dj_emma_liked_nonstops';
+        toggleVisitorLikedId(storageKey, id, data.liked);
+
+        if (type === 'live') {
+          setLiveMixes((prev) =>
+            prev.map((m) => (m.id === id ? { ...m, likesCount: Number(data.likes_count) } : m))
+          );
+        } else {
+          setNonstops((prev) =>
+            prev.map((n) => (n.id === id ? { ...n, likesCount: Number(data.likes_count) } : n))
+          );
+        }
+        return;
+      }
+
+      // 2. Server API fallback if RPC had network issue
       const endpoint = type === 'live' ? `/api/mixes/${id}/like` : `/api/nonstops/${id}/like`;
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ visitorId }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        toggleVisitorLikedId(type === 'live' ? 'dj_emma_liked_live' : 'dj_emma_liked_nonstops', id, data.liked);
-        if (type === 'live') {
-          setLiveMixes((prev) =>
-            prev.map((m) => (m.id === id ? { ...m, likesCount: data.likesCount } : m))
-          );
-        } else {
-          setNonstops((prev) =>
-            prev.map((n) => (n.id === id ? { ...n, likesCount: data.likesCount } : n))
-          );
+      }).catch(() => null);
+
+      if (res && res.ok) {
+        const resData = await res.json();
+        if (resData.success) {
+          toggleVisitorLikedId(type === 'live' ? 'dj_emma_liked_live' : 'dj_emma_liked_nonstops', id, resData.liked);
+          if (type === 'live') {
+            setLiveMixes((prev) =>
+              prev.map((m) => (m.id === id ? { ...m, likesCount: resData.likesCount } : m))
+            );
+          } else {
+            setNonstops((prev) =>
+              prev.map((n) => (n.id === id ? { ...n, likesCount: resData.likesCount } : n))
+            );
+          }
         }
       }
-    } catch {
-      // Ignored
+    } catch (err) {
+      console.warn('Like mix error:', err);
     }
   };
 
   const handleLikeNews = async (id: string) => {
     try {
       const visitorId = getVisitorId();
+
+      // 1. Direct Supabase Cloud RPC
+      const { data, error } = await supabase.rpc('toggle_post_like', {
+        p_post_id: id,
+        p_visitor_id: visitorId,
+      });
+
+      if (!error && data && typeof data.liked === 'boolean') {
+        toggleVisitorLikedId('dj_emma_liked_news', id, data.liked);
+        setNewsPosts((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, likesCount: Number(data.likes_count) } : p))
+        );
+        return;
+      }
+
+      // 2. Server API fallback if RPC had issue
       const res = await fetch(`/api/news/${id}/like`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ visitorId }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        toggleVisitorLikedId('dj_emma_liked_news', id, data.liked);
-        setNewsPosts((prev) =>
-          prev.map((p) => (p.id === id ? { ...p, likesCount: data.likesCount } : p))
-        );
+      }).catch(() => null);
+
+      if (res && res.ok) {
+        const resData = await res.json();
+        if (resData.success) {
+          toggleVisitorLikedId('dj_emma_liked_news', id, resData.liked);
+          setNewsPosts((prev) =>
+            prev.map((p) => (p.id === id ? { ...p, likesCount: resData.likesCount } : p))
+          );
+        }
       }
-    } catch {
-      // Ignored
+    } catch (err) {
+      console.warn('Like news error:', err);
     }
+  };
+
+  const handleCommentAdded = (targetId: string, count: number) => {
+    setCommentCounts((prev) => {
+      const next = { ...prev, [targetId]: count };
+      try {
+        localStorage.setItem('dj_emma_comment_counts', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
   };
 
   return (
@@ -353,6 +461,7 @@ export default function App() {
                   onLikeMix={handleLikeMix}
                   onLikeNews={handleLikeNews}
                   onOpenComments={handleOpenComments}
+                  commentCounts={commentCounts}
                 />
               )}
 
@@ -363,6 +472,7 @@ export default function App() {
                   onOpenUpload={() => handleTabChange('admin')}
                   onLikeMix={(id) => handleLikeMix(id, 'live')}
                   onOpenComments={handleOpenComments}
+                  commentCounts={commentCounts}
                 />
               )}
 
@@ -373,6 +483,7 @@ export default function App() {
                   onOpenUpload={() => handleTabChange('admin')}
                   onLikeNonstop={(id) => handleLikeMix(id, 'nonstop')}
                   onOpenComments={handleOpenComments}
+                  commentCounts={commentCounts}
                 />
               )}
 
@@ -406,7 +517,7 @@ export default function App() {
                     </p>
                     <button
                       onClick={() => setIsLoginModalOpen(true)}
-                      className="px-6 py-3 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider"
+                      className="px-6 py-3 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider cursor-pointer"
                     >
                       ENTER ADMIN PIN
                     </button>
@@ -432,6 +543,7 @@ export default function App() {
               targetId={commentsModal.targetId}
               targetType={commentsModal.targetType}
               targetTitle={commentsModal.targetTitle}
+              onCommentAdded={handleCommentAdded}
             />
 
             {/* Discreet Bottom Controls (Return to START, Admin Login) */}

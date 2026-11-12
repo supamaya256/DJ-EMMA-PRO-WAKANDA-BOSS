@@ -19,6 +19,7 @@ interface AudioContextType {
   seek: (seconds: number) => void;
   setVolume: (vol: number) => void;
   toggleMute: () => void;
+  closePlayer: () => void;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -105,6 +106,16 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const closePlayer = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setCurrentTrack(null);
+  };
+
   const resumeTrack = async () => {
     if (audioRef.current && currentTrack) {
       try {
@@ -165,6 +176,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         seek,
         setVolume,
         toggleMute,
+        closePlayer,
       }}
     >
       {children}
