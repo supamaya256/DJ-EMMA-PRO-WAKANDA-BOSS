@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Homepage: Official DJ EMMA PRO Music & Entertainment Hub -->
+  <url>
+    <loc>https://djemmapro.online/</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Live Mixes: Club & Concert DJ Mixes, Afrobeats, Dancehall & Ugandan Sets -->
+  <url>
+    <loc>https://djemmapro.online/live-mixes</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Nonstop Mixes: Party Mixtapes, Blends & Audio Downloads -->
+  <url>
+    <loc>https://djemmapro.online/nonstops</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- About Me: Official Biography, Serere Roots, DJ Drops & Booking Contact -->
+  <url>
+    <loc>https://djemmapro.online/about-me</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Privacy Policy: User Data, Supabase Protection & Google AdSense Disclosures -->
+  <url>
+    <loc>https://djemmapro.online/privacy-policy</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Terms & Conditions: 100% Artist IP Ownership, DMCA Notice & Platform Terms -->
+  <url>
+    <loc>https://djemmapro.online/terms-conditions</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+</urlset>

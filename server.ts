@@ -1068,6 +1068,11 @@ app.delete('/api/comments/:id', (req, res) => {
 // VITE DEV SERVER OR STATIC PROD SERVING
 // ----------------------------------------------------
 async function startServer() {
+  const publicPath = path.join(__dirname, 'public');
+  if (fs.existsSync(publicPath)) {
+    app.use(express.static(publicPath));
+  }
+
   if (!isProd) {
     const vite = await createViteServer({
       server: { middlewareMode: true },

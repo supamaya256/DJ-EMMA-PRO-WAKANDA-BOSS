@@ -19,17 +19,29 @@ import { ShieldCheck, ArrowLeft, FileText, Lock, Cookie } from 'lucide-react';
 import { getVisitorId, toggleVisitorLikedId } from './lib/visitor';
 import { supabase } from './lib/supabase';
 
+const getInitialRouteInfo = (): { tab: ActiveTab; hasExplicitRoute: boolean } => {
+  const path = window.location.pathname.replace(/^\/+|\/+$/g, '') as ActiveTab;
+  const hash = window.location.hash.replace(/^#+/, '') as ActiveTab;
+  const validTabs: ActiveTab[] = ['home', 'live-mixes', 'nonstops', 'about-me', 'admin', 'privacy-policy', 'terms-conditions'];
+
+  if (validTabs.includes(path) && path !== 'home') {
+    return { tab: path, hasExplicitRoute: true };
+  }
+  if (validTabs.includes(hash)) {
+    return { tab: hash, hasExplicitRoute: hash !== 'home' };
+  }
+  return { tab: 'home', hasExplicitRoute: false };
+};
+
 export default function App() {
   const [hasStarted, setHasStarted] = useState<boolean>(() => {
+    const route = getInitialRouteInfo();
+    if (route.hasExplicitRoute) return true;
     return sessionStorage.getItem('dj_emma_has_started') === 'true';
   });
 
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
-    const hash = window.location.hash.replace('#', '') as ActiveTab;
-    if (['home', 'live-mixes', 'nonstops', 'about-me', 'admin', 'privacy-policy', 'terms-conditions'].includes(hash)) {
-      return hash;
-    }
-    return 'home';
+    return getInitialRouteInfo().tab;
   });
 
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
@@ -270,21 +282,30 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Sync hash routing for browser back/forward buttons
+  // Sync URL changes (both history popstate and hash) for back/forward and deep linking
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '') as ActiveTab;
-      if (['home', 'live-mixes', 'nonstops', 'about-me', 'admin', 'privacy-policy', 'terms-conditions'].includes(hash)) {
-        setActiveTab(hash);
+    const handleUrlChange = () => {
+      const route = getInitialRouteInfo();
+      setActiveTab(route.tab);
+      if (route.hasExplicitRoute) {
+        setHasStarted(true);
       }
     };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    window.addEventListener('popstate', handleUrlChange);
+    return () => {
+      window.removeEventListener('hashchange', handleUrlChange);
+      window.removeEventListener('popstate', handleUrlChange);
+    };
   }, []);
 
   const handleTabChange = (tab: ActiveTab) => {
     setActiveTab(tab);
-    window.location.hash = tab;
+    if (tab === 'home') {
+      window.history.pushState(null, '', '/');
+    } else {
+      window.history.pushState(null, '', `/${tab}`);
+    }
   };
 
   const handleStart = () => {
