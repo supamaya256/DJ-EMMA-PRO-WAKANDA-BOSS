@@ -1,0 +1,65 @@
+{
+  "adminPin": "2560",
+  "supabaseConfig": {
+    "url": "https://ruyediepdsvycrxniplt.supabase.co",
+    "anonKey": "sb_publishable_EaGYMl3jfXzLvuJTGLH7oA_N_3yM9gw",
+    "serviceRoleKey": ""
+  },
+  "artist": {
+    "id": "dj_emma_pro",
+    "stageName": "DJ EMMA PRO",
+    "alias": "THE WAKANDA BOSS",
+    "tagline": "Uganda’s Premier DJ, Mixing Prodigy & Creative Architect",
+    "bio": "DJ EMMA PRO is a Ugandan DJ and creative professional from Serere District in the Teso Region of Eastern Uganda, based in Kampala. He is passionate about music entertainment, DJ mixing, graphic design, creative branding and professional DJ drops. Known as THE WAKANDA BOSS, DJ EMMA PRO represents the Ugandan entertainment scene through music, creativity and energetic mixes.",
+    "origin": "Serere District, Teso Region, Eastern Uganda",
+    "baseLocation": "Kampala, Uganda",
+    "phone": "+256 788 123 456",
+    "email": "supamaya256@gmail.com",
+    "bookingWhatsapp": "+256788123456",
+    "avatarUrl": "/assets/aistudio/file_000000004a80821193402a6d1202b9b2_20123475.png",
+    "heroPortraitUrl": "/assets/aistudio/file_00000000577482118275a24f7cbcec0a_37ac2a88.png",
+    "socialLinks": {
+      "tiktok": "https://tiktok.com/@djemmapro",
+      "instagram": "https://instagram.com/djemmapro",
+      "youtube": "https://youtube.com/@djemmapro",
+      "facebook": "https://facebook.com/djemmapro"
+    },
+    "services": [
+      {
+        "id": "1",
+        "title": "Live Club & Concert DJ Mixing",
+        "desc": "Electrifying crowd-pulling sets spanning Afrobeats, Dancehall, Amapiano & Ugandan hits."
+      },
+      {
+        "id": "2",
+        "title": "Custom DJ Drops & Intros",
+        "desc": "Signature studio-grade DJ drops, radio jingles, and promotional voiceovers."
+      },
+      {
+        "id": "3",
+        "title": "Graphic Design & Creative Branding",
+        "desc": "Album artwork, event flyers, social media kits, and 3D metallic logos."
+      },
+      {
+        "id": "4",
+        "title": "Mixtape Production & Audio Mastering",
+        "desc": "Seamlessly blended party tapes and pristine studio audio mastering."
+      }
+    ]
+  },
+  "liveMixes": [],
+  "nonstops": [],
+  "newsPosts": [],
+  "visitorLikes": {
+    "news-1794456614556": [],
+    "news-1794459383473": [
+      "visitor_kampala_02"
+    ]
+  },
+  "homepage": {
+    "heroTitle": "DJ EMMA PRO",
+    "heroSubtitle": "THE WAKANDA BOSS",
+    "tagline": "UGANDAN DJ & CREATIVE PROFESSIONAL",
+    "featuredMixId": ""
+  }
+}

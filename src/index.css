@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Montserrat', sans-serif;
+    overflow-x: hidden;
+  }
+  
+  h1, h2, h3, .font-display {
+    font-family: 'Orbitron', 'Rajdhani', 'Montserrat', sans-serif;
+  }
+}
+
+/* Chrome & Metallic text effects matching Image 2 */
+.chrome-text {
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #e2e8f0 25%,
+    #94a3b8 48%,
+    #cbd5e1 52%,
+    #ffffff 75%,
+    #64748b 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7)) drop-shadow(0 6px 12px rgba(255, 255, 255, 0.25));
+}
+
+.chrome-bevel {
+  text-shadow: 
+    0 1px 0 #fff,
+    0 2px 0 #cbd5e1,
+    0 3px 0 #94a3b8,
+    0 4px 0 #64748b,
+    0 5px 6px rgba(0,0,0,0.8),
+    0 0 15px rgba(255,255,255,0.4);
+}
+
+/* Glass Tube Navigation Bar from Image 2 */
+.glass-nav-bar {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(180, 190, 205, 0.15) 20%,
+    rgba(40, 45, 55, 0.65) 50%,
+    rgba(20, 25, 35, 0.85) 100%
+  );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    inset 0 1px 2px rgba(255, 255, 255, 0.7),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.8),
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(200, 220, 255, 0.15);
+}
+
+/* Active Nav Button Capsule */
+.glass-nav-active {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(220, 230, 245, 0.2) 40%,
+    rgba(60, 70, 85, 0.6) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 
+    0 0 16px rgba(255, 255, 255, 0.5),
+    inset 0 1px 3px rgba(255, 255, 255, 0.8);
+}
+
+/* Glass Card */
+.glass-card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.03) 50%,
+    rgba(15, 23, 42, 0.6) 100%
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Start Button Glow from Image 1 */
+.start-glow {
+  box-shadow: 
+    0 0 30px rgba(0, 162, 255, 0.9),
+    0 0 60px rgba(0, 102, 255, 0.6),
+    inset 0 0 15px rgba(255, 255, 255, 0.8);
+}
+
+/* Smooth custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.9);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(203, 213, 225, 0.7);
+}
