@@ -4,9 +4,6 @@ interface StartScreenProps {
   onStart: () => void;
 }
 
-const SUPABASE_WELCOME_AUDIO_URL =
-  'https://ruyediepdsvycrxniplt.supabase.co/storage/v1/object/public/DJ%20EMMA%20PRO/WELCOME.mp3';
-
 export const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
   const [isTransitioning, setIsTransitioning] = useState(false);
 
@@ -14,35 +11,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
     if (isTransitioning) return;
     setIsTransitioning(true);
 
-    // PLAY WELCOMING VOICE AUDIO:
-    // When anyone taps START, immediately play the welcoming voice from Supabase Storage
-    try {
-      const welcomeAudio = new Audio(SUPABASE_WELCOME_AUDIO_URL);
-      welcomeAudio.volume = 1.0;
-
-      // Automatic seamless fallback to local/proxy endpoint if Supabase bucket is private
-      welcomeAudio.onerror = () => {
-        console.warn('Direct Supabase welcome audio unreachable, switching to proxy fallback');
-        welcomeAudio.src = '/api/welcome-audio';
-        welcomeAudio.play().catch(() => {});
-      };
-
-      const playPromise = welcomeAudio.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((err) => {
-          console.warn('Playback error, trying proxy endpoint:', err);
-          welcomeAudio.src = '/api/welcome-audio';
-          welcomeAudio.play().catch(() => {});
-        });
-      }
-
-      // Keep reference alive across page transitions so it plays into the main website
-      (window as any).__djEmmaWelcomeVoice = welcomeAudio;
-    } catch (err) {
-      console.warn('Could not initialize welcome audio:', err);
-    }
-
-    // Smooth transition into Image 2 main website dashboard
+    // Smooth transition into main website dashboard
     setTimeout(() => {
       onStart();
     }, 450);

@@ -12,7 +12,10 @@ import { AboutSection } from './components/AboutSection';
 import { AdminDashboard } from './components/AdminDashboard';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { CommentsModal } from './components/CommentsModal';
-import { ShieldCheck, ArrowLeft } from 'lucide-react';
+import { PrivacyPolicySection } from './components/PrivacyPolicySection';
+import { TermsConditionsSection } from './components/TermsConditionsSection';
+import { CookieConsentBanner } from './components/CookieConsentBanner';
+import { ShieldCheck, ArrowLeft, FileText, Lock, Cookie } from 'lucide-react';
 import { getVisitorId, toggleVisitorLikedId } from './lib/visitor';
 import { supabase } from './lib/supabase';
 
@@ -23,7 +26,7 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
     const hash = window.location.hash.replace('#', '') as ActiveTab;
-    if (['home', 'live-mixes', 'nonstops', 'about-me', 'admin'].includes(hash)) {
+    if (['home', 'live-mixes', 'nonstops', 'about-me', 'admin', 'privacy-policy', 'terms-conditions'].includes(hash)) {
       return hash;
     }
     return 'home';
@@ -34,6 +37,7 @@ export default function App() {
   });
 
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isCookiePreferencesOpen, setIsCookiePreferencesOpen] = useState(false);
 
   // Global Comments Modal State
   const [commentsModal, setCommentsModal] = useState<{
@@ -270,7 +274,7 @@ export default function App() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '') as ActiveTab;
-      if (['home', 'live-mixes', 'nonstops', 'about-me', 'admin'].includes(hash)) {
+      if (['home', 'live-mixes', 'nonstops', 'about-me', 'admin', 'privacy-policy', 'terms-conditions'].includes(hash)) {
         setActiveTab(hash);
       }
     };
@@ -419,8 +423,8 @@ export default function App() {
         {!hasStarted ? (
           <StartScreen onStart={handleStart} />
         ) : (
-          /* SECOND DASHBOARD: ORIGINAL GLASS-GRAY DJ EMMA PRO DASHBOARD (IMAGE 2) */
-          <div className="relative min-h-screen flex flex-col justify-between bg-gradient-to-b from-[#353943] via-[#21242c] to-[#0f1115]">
+          /* SECOND DASHBOARD: ROYAL-BLUE & METALLIC-GOLD THEME */
+          <div className="relative min-h-screen flex flex-col justify-between bg-gradient-to-b from-[#060a16] via-[#0b142c] to-[#050811]">
             
             {/* 
               PERMANENT STICKY / FIXED TOP NAVIGATION BAR:
@@ -442,10 +446,10 @@ export default function App() {
 
             {/* 
               IMAGE 2 MASTER DASHBOARD HERO:
-              Preserves DJ EMMA PRO photograph, 3D chrome lettering, and metallic background.
+              Preserves DJ EMMA PRO photograph, 3D chrome lettering, and metallic royal blue/gold banner.
               Duplicate lower navigation bar is completely removed.
             */}
-            <section className="w-full bg-[#24272e] border-b border-white/10 shadow-2xl">
+            <section className="w-full bg-[#060a16] border-b border-amber-400/20 shadow-2xl">
               <MainDashboardHeader />
             </section>
 
@@ -495,6 +499,18 @@ export default function App() {
                 />
               )}
 
+              {activeTab === 'privacy-policy' && (
+                <PrivacyPolicySection
+                  onBackToHome={() => handleTabChange('home')}
+                />
+              )}
+
+              {activeTab === 'terms-conditions' && (
+                <TermsConditionsSection
+                  onBackToHome={() => handleTabChange('home')}
+                />
+              )}
+
               {activeTab === 'admin' && (
                 isAdminAuthenticated ? (
                   <AdminDashboard
@@ -508,8 +524,8 @@ export default function App() {
                     onLogout={handleLogout}
                   />
                 ) : (
-                  <div className="max-w-md mx-auto my-16 p-8 rounded-3xl glass-card border border-white/20 text-center space-y-4">
-                    <h3 className="text-xl font-bold chrome-text font-display uppercase">
+                  <div className="max-w-md mx-auto my-16 p-8 rounded-3xl royal-glass-card border border-amber-400/30 text-center space-y-4">
+                    <h3 className="text-xl font-bold gold-chrome-text font-display uppercase">
                       Admin Access Required
                     </h3>
                     <p className="text-xs text-slate-300">
@@ -517,7 +533,7 @@ export default function App() {
                     </p>
                     <button
                       onClick={() => setIsLoginModalOpen(true)}
-                      className="px-6 py-3 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-3 rounded-full gold-btn text-slate-950 font-extrabold text-xs uppercase tracking-wider cursor-pointer"
                     >
                       ENTER ADMIN PIN
                     </button>
@@ -546,43 +562,106 @@ export default function App() {
               onCommentAdded={handleCommentAdded}
             />
 
-            {/* Discreet Bottom Controls (Return to START, Admin Login) */}
-            <footer className="w-full border-t border-white/10 py-6 px-4 text-center text-xs text-slate-400 bg-black/40">
-              <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="font-display font-black text-white chrome-text">
-                    DJ EMMA PRO
-                  </span>
-                  <span>•</span>
-                  <span>THE WAKANDA BOSS</span>
+            {/* Cookie Consent Management Banner with Granular Preferences Modal */}
+            <CookieConsentBanner
+              onNavigateToPrivacy={() => handleTabChange('privacy-policy')}
+              isOpenPreferences={isCookiePreferencesOpen}
+              onClosePreferences={() => setIsCookiePreferencesOpen(false)}
+            />
+
+            {/* Google AdSense Compliant Footer with Legal Pages & Privacy Controls */}
+            <footer className="w-full border-t border-amber-400/20 py-8 px-4 text-xs text-slate-400 bg-[#060a16]/95 backdrop-blur-md">
+              <div className="max-w-7xl mx-auto space-y-6">
+                
+                {/* Top Row: Brand & Quick Navigation */}
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-white/10 pb-6">
+                  <div className="flex items-center gap-2">
+                    <span className="font-display font-black text-amber-300 gold-chrome-text text-base">
+                      DJ EMMA PRO
+                    </span>
+                    <span className="text-amber-400">•</span>
+                    <span className="text-slate-300 font-bold uppercase tracking-wider text-[11px]">THE WAKANDA BOSS</span>
+                    <span className="text-amber-400">•</span>
+                    <span className="text-slate-400 text-[11px]">Serere ➔ Kampala, Uganda</span>
+                  </div>
+
+                  {/* Main Navigation Links in Footer */}
+                  <div className="flex flex-wrap items-center justify-center gap-4 text-[12px] font-semibold text-slate-300">
+                    <button onClick={() => handleTabChange('home')} className="hover:text-amber-300 transition cursor-pointer">
+                      Home
+                    </button>
+                    <button onClick={() => handleTabChange('live-mixes')} className="hover:text-amber-300 transition cursor-pointer">
+                      Live Mixes
+                    </button>
+                    <button onClick={() => handleTabChange('nonstops')} className="hover:text-amber-300 transition cursor-pointer">
+                      Nonstop Mixes
+                    </button>
+                    <button onClick={() => handleTabChange('about-me')} className="hover:text-amber-300 transition cursor-pointer">
+                      About & Booking
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleReturnToStart}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition text-[11px] cursor-pointer"
+                    >
+                      <ArrowLeft className="w-3 h-3 text-amber-300" />
+                      <span>Start Screen</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        if (isAdminAuthenticated) {
+                          handleTabChange('admin');
+                        } else {
+                          setIsLoginModalOpen(true);
+                        }
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/30 transition text-[11px] cursor-pointer"
+                    >
+                      <ShieldCheck className="w-3 h-3 text-amber-400" />
+                      <span>{isAdminAuthenticated ? 'Admin Panel' : 'DJ Login'}</span>
+                    </button>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={handleReturnToStart}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition text-[11px]"
-                  >
-                    <ArrowLeft className="w-3 h-3" />
-                    <span>View START Screen</span>
-                  </button>
+                {/* Middle Row: Google AdSense Mandatory Legal Pages & Cookie Consent */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-400">
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4">
+                    <button
+                      onClick={() => handleTabChange('privacy-policy')}
+                      className="flex items-center gap-1.5 hover:text-amber-300 transition underline underline-offset-4 cursor-pointer"
+                    >
+                      <Lock className="w-3 h-3 text-amber-400" />
+                      <span>Privacy Policy</span>
+                    </button>
 
-                  <button
-                    onClick={() => {
-                      if (isAdminAuthenticated) {
-                        handleTabChange('admin');
-                      } else {
-                        setIsLoginModalOpen(true);
-                      }
-                    }}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition text-[11px]"
-                  >
-                    <ShieldCheck className="w-3 h-3 text-amber-400" />
-                    <span>{isAdminAuthenticated ? 'Admin Panel' : 'DJ Login'}</span>
-                  </button>
+                    <button
+                      onClick={() => handleTabChange('terms-conditions')}
+                      className="flex items-center gap-1.5 hover:text-amber-300 transition underline underline-offset-4 cursor-pointer"
+                    >
+                      <FileText className="w-3 h-3 text-amber-400" />
+                      <span>Terms & Conditions</span>
+                    </button>
+
+                    <button
+                      onClick={() => setIsCookiePreferencesOpen(true)}
+                      className="flex items-center gap-1.5 hover:text-amber-300 transition underline underline-offset-4 cursor-pointer text-amber-400 font-medium"
+                    >
+                      <Cookie className="w-3 h-3 text-amber-400" />
+                      <span>Cookie Preferences</span>
+                    </button>
+                  </div>
+
+                  <div className="text-center sm:text-right text-[10px] text-slate-400">
+                    Google AdSense Partner Compliant • All Featured Artists Retain 100% IP Rights
+                  </div>
                 </div>
 
-                <div className="text-[11px] text-slate-500">
-                  Serere District ➔ Kampala • All Rights Reserved &copy; {new Date().getFullYear()}
+                {/* Bottom Row: Copyright & Disclaimers */}
+                <div className="text-center pt-2 text-[10px] text-slate-400">
+                  &copy; {new Date().getFullYear()} DJ EMMA PRO (THE WAKANDA BOSS). Official Music & Entertainment Platform.
                 </div>
               </div>
             </footer>

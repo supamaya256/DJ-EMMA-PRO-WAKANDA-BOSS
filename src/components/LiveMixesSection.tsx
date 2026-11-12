@@ -61,14 +61,14 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
   return (
     <div className="w-full text-white pb-28 pt-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Header Banner */}
-      <div className="relative rounded-3xl glass-card border border-white/25 p-6 sm:p-10 mb-8 overflow-hidden shadow-2xl">
+      <div className="relative rounded-3xl royal-glass-card border-2 border-amber-400/50 p-6 sm:p-10 mb-8 overflow-hidden shadow-2xl">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 text-xs font-bold uppercase tracking-wider">
-              <Radio className="w-3.5 h-3.5 animate-pulse text-red-400" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 text-xs font-bold uppercase tracking-wider">
+              <Radio className="w-3.5 h-3.5 text-amber-400" />
               <span>OFFICIAL LIVE SETS & CLUB ANTHEMS</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black chrome-text font-display uppercase tracking-tight">
+            <h1 className="text-3xl sm:text-5xl font-black gold-chrome-text font-display uppercase tracking-tight">
               LIVE MIXES
             </h1>
             <p className="text-slate-300 text-sm sm:text-base max-w-2xl">
@@ -79,7 +79,7 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
           {isAdmin && (
             <button
               onClick={onOpenUpload}
-              className="self-start md:self-center px-6 py-3.5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 font-extrabold text-sm uppercase tracking-wider flex items-center gap-2 shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:scale-105 transition cursor-pointer"
+              className="self-start md:self-center px-6 py-3.5 rounded-full gold-btn font-extrabold text-sm uppercase tracking-wider flex items-center gap-2 shadow-xl hover:scale-105 transition cursor-pointer"
             >
               <PlusCircle className="w-5 h-5" />
               <span>UPLOAD NEW LIVE MIX</span>
@@ -98,8 +98,8 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
               onClick={() => setSelectedGenre(g)}
               className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer ${
                 selectedGenre === g
-                  ? 'glass-nav-active text-white border border-cyan-400/50 shadow-md'
-                  : 'glass-card text-slate-300 hover:text-white border border-white/10 hover:border-white/20'
+                  ? 'royal-nav-active border border-amber-400/80 font-black shadow-md'
+                  : 'royal-glass-card text-slate-300 hover:text-white border border-white/10 hover:border-amber-400/40'
               }`}
             >
               {g}
@@ -149,11 +149,11 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
             return (
               <div
                 key={mix.id}
-                className="group rounded-2xl glass-card overflow-hidden border border-white/20 hover:border-cyan-400/60 transition-all duration-300 hover:-translate-y-1 shadow-2xl flex flex-col justify-between"
+                className="group rounded-2xl royal-glass-card overflow-hidden border border-amber-400/35 hover:border-amber-400 transition-all duration-300 hover:-translate-y-1 shadow-2xl flex flex-col justify-between"
               >
                 {/* Artwork Top */}
                 <div>
-                  <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
+                  <div className="relative aspect-video w-full overflow-hidden bg-[#050916]">
                     <img
                       src={mix.coverUrl}
                       alt={mix.title}
@@ -170,7 +170,7 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
                           playTrack(mix, 'live');
                         }
                       }}
-                      className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-white/95 hover:bg-white text-slate-950 flex items-center justify-center shadow-2xl transition hover:scale-110 active:scale-95 cursor-pointer"
+                      className="absolute inset-0 m-auto w-14 h-14 rounded-full gold-btn flex items-center justify-center shadow-2xl transition hover:scale-110 active:scale-95 cursor-pointer"
                       title={isThisPlaying ? 'Pause' : 'Play live mix'}
                     >
                       {isThisPlaying ? (
@@ -181,7 +181,7 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
                     </button>
 
                     {/* Genre Tag */}
-                    <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/30 text-cyan-200 border border-cyan-400/40 backdrop-blur-md">
+                    <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-950/80 text-amber-200 border border-amber-400/40 backdrop-blur-md">
                       {mix.genre}
                     </span>
 

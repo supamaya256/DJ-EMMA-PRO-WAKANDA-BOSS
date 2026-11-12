@@ -94,7 +94,7 @@ export interface SupabaseStatus {
   };
 }
 
-export type ActiveTab = 'home' | 'live-mixes' | 'nonstops' | 'about-me' | 'admin';
+export type ActiveTab = 'home' | 'live-mixes' | 'nonstops' | 'about-me' | 'admin' | 'privacy-policy' | 'terms-conditions';
 
 export interface Comment {
   id: string;

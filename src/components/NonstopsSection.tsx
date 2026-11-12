@@ -50,14 +50,14 @@ export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
   return (
     <div className="w-full text-white pb-28 pt-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Banner */}
-      <div className="relative rounded-3xl glass-card border border-white/25 p-6 sm:p-10 mb-8 overflow-hidden shadow-2xl">
+      <div className="relative rounded-3xl royal-glass-card border-2 border-amber-400/50 p-6 sm:p-10 mb-8 overflow-hidden shadow-2xl">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/30 text-xs font-bold uppercase tracking-wider">
-              <Music className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 text-xs font-bold uppercase tracking-wider">
+              <Music className="w-3.5 h-3.5 text-amber-400" />
               <span>UNINTERRUPTED PARTY SESSIONS • EXCLUSIVE NONSTOPS</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black chrome-text font-display uppercase tracking-tight">
+            <h1 className="text-3xl sm:text-5xl font-black gold-chrome-text font-display uppercase tracking-tight">
               NONSTOP MIXES
             </h1>
             <p className="text-slate-300 text-sm sm:text-base max-w-2xl">
@@ -68,7 +68,7 @@ export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
           {isAdmin && (
             <button
               onClick={onOpenUpload}
-              className="self-start md:self-center px-6 py-3.5 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-extrabold text-sm uppercase tracking-wider flex items-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:scale-105 transition cursor-pointer"
+              className="self-start md:self-center px-6 py-3.5 rounded-full gold-btn font-extrabold text-sm uppercase tracking-wider flex items-center gap-2 shadow-xl hover:scale-105 transition cursor-pointer"
             >
               <PlusCircle className="w-5 h-5" />
               <span>UPLOAD NEW NONSTOP</span>
@@ -131,11 +131,11 @@ export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
             return (
               <div
                 key={nonstop.id}
-                className="group rounded-2xl glass-card overflow-hidden border border-white/20 hover:border-purple-400/60 transition-all duration-300 hover:-translate-y-1 shadow-2xl flex flex-col justify-between"
+                className="group rounded-2xl royal-glass-card overflow-hidden border border-amber-400/35 hover:border-amber-400 transition-all duration-300 hover:-translate-y-1 shadow-2xl flex flex-col justify-between"
               >
                 <div>
                   {/* Artwork & Play button */}
-                  <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
+                  <div className="relative aspect-video w-full overflow-hidden bg-[#050916]">
                     <img
                       src={nonstop.coverUrl}
                       alt={nonstop.title}
@@ -151,7 +151,7 @@ export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
                           playTrack(nonstop, 'nonstop');
                         }
                       }}
-                      className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-white/95 hover:bg-white text-slate-950 flex items-center justify-center shadow-2xl transition hover:scale-110 active:scale-95 cursor-pointer"
+                      className="absolute inset-0 m-auto w-14 h-14 rounded-full gold-btn flex items-center justify-center shadow-2xl transition hover:scale-110 active:scale-95 cursor-pointer"
                       title={isThisPlaying ? 'Pause' : 'Play nonstop'}
                     >
                       {isThisPlaying ? (
@@ -161,7 +161,7 @@ export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
                       )}
                     </button>
 
-                    <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-500/30 text-purple-200 border border-purple-400/40 backdrop-blur-md">
+                    <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-950/80 text-amber-200 border border-amber-400/40 backdrop-blur-md">
                       {nonstop.genre}
                     </span>
 
