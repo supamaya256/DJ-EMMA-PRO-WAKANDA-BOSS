@@ -49,7 +49,6 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [spotlightIndex, setSpotlightIndex] = useState<number>(0);
   const [isSpotlightPaused, setIsSpotlightPaused] = useState<boolean>(false);
-  const [highlightedPostId, setHighlightedPostId] = useState<string | null>(null);
 
   const publishedNews = newsPosts.filter((p) => p.isPublished);
   const publishedLive = liveMixes.filter((m) => m.isPublished);
@@ -88,14 +87,12 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
     }
   };
 
-  const handleTickerClick = (post: NewsPost, idx: number) => {
+  const handleTickerClick = (_post: NewsPost, idx: number) => {
     setSpotlightIndex(idx);
-    setHighlightedPostId(post.id);
-    const cardEl = document.getElementById(`news-post-${post.id}`);
-    if (cardEl) {
-      cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const boxEl = document.getElementById('news-spotlight-box');
+    if (boxEl) {
+      boxEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-    window.setTimeout(() => setHighlightedPostId(null), 2400);
   };
 
   const formatDate = (isoString: string) => {
@@ -140,8 +137,11 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
 
             <button
               onClick={() => {
-                const el = document.getElementById('all-news-container');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                if (publishedNews.length > 1) {
+                  setSpotlightIndex((prev) => (prev + 1) % publishedNews.length);
+                }
+                const boxEl = document.getElementById('news-spotlight-box');
+                if (boxEl) boxEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
               }}
               className="cursor-pointer px-3 sm:px-5 py-1.5 sm:py-2 rounded-full gold-btn text-[11px] sm:text-xs font-black uppercase tracking-wider shrink-0 flex items-center gap-1.5 shadow-lg hover:scale-105 active:scale-95 transition"
             >
@@ -211,6 +211,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
             {/* AUTOMATICALLY TRANSITIONING FEATURED SPOTLIGHT ARTICLE */}
             {featuredPost && (
               <div
+                id="news-spotlight-box"
                 onMouseEnter={() => setIsSpotlightPaused(true)}
                 onMouseLeave={() => setIsSpotlightPaused(false)}
                 onFocusCapture={() => setIsSpotlightPaused(true)}
@@ -356,93 +357,6 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
                 </article>
               </div>
             )}
-
-            {/* ALL PUBLISHED NEWS GRID — NO SHOW MORE / LOAD MORE TRUNCATION */}
-            <div id="all-news-container" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pt-2">
-              {publishedNews.map((post, index) => (
-                <ScrollReveal key={post.id} delayMs={index * 60}>
-                  <article
-                    id={`news-post-${post.id}`}
-                    className={`group h-full rounded-2xl royal-glass-card card-3d-hover overflow-hidden border transition-all duration-300 shadow-xl flex flex-col justify-between ${
-                      highlightedPostId === post.id
-                        ? 'border-sky-400 ring-2 ring-sky-400/60 shadow-[0_0_28px_rgba(56,189,248,0.45)]'
-                        : 'border-amber-400/40'
-                    }`}
-                  >
-                    <div>
-                      {post.imageUrl && (
-                        <div
-                          onClick={() => setPreviewImage(post.imageUrl || null)}
-                          className="relative aspect-video w-full overflow-hidden bg-[#040816] cursor-pointer"
-                        >
-                          <img
-                            src={post.imageUrl}
-                            alt={post.title}
-                            className="w-full h-full object-cover img-smooth-zoom"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none" />
-                          <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded text-[10px] font-bold bg-black/75 text-sky-300 border border-sky-400/35 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <ImageIcon className="w-3 h-3" />
-                            <span>Zoom</span>
-                          </span>
-                        </div>
-                      )}
-
-                      <div className="p-4 sm:p-5 space-y-2">
-                        <div className="flex items-center gap-2 text-[11px] text-amber-300 font-semibold">
-                          <Calendar className="w-3 h-3 text-sky-400" />
-                          <span>{formatDate(post.createdAt)}</span>
-                          <span className="text-sky-400">•</span>
-                          <span>THE WAKANDA BOSS</span>
-                        </div>
-
-                        <h4 className="font-bold text-base sm:text-lg text-white group-hover:text-amber-300 transition font-display">
-                          {post.title}
-                        </h4>
-
-                        <p className="text-xs sm:text-[13px] text-slate-300 leading-relaxed whitespace-pre-line">
-                          {post.content}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="px-4 sm:px-5 pb-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-400 gap-2">
-                      <button
-                        onClick={() => onLikeNews(post.id)}
-                        className={`cursor-pointer flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition active:scale-95 ${
-                          isItemLikedByVisitor('dj_emma_liked_news', post.id)
-                            ? 'bg-rose-500/25 text-rose-300 border-rose-400/50'
-                            : 'bg-white/5 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border-white/10'
-                        }`}
-                      >
-                        <Heart className={`w-3 h-3 ${isItemLikedByVisitor('dj_emma_liked_news', post.id) ? 'fill-rose-500 text-rose-400' : 'text-rose-400'}`} />
-                        <span className="font-bold text-white text-[11px]">{post.likesCount}</span>
-                      </button>
-
-                      <button
-                        onClick={() => onOpenComments?.(post.id, 'news', post.title)}
-                        className="cursor-pointer flex items-center gap-1 text-[11px] text-slate-300 hover:text-sky-300 transition"
-                      >
-                        <MessageSquare className="w-3 h-3 text-amber-400" />
-                        <span>Comments {commentCounts[post.id] ? `(${commentCounts[post.id]})` : ''}</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleShareNews(post)}
-                        className="cursor-pointer p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white transition"
-                        title="Share article"
-                      >
-                        {copiedPostId === post.id ? (
-                          <span className="text-[10px] font-bold text-emerald-300">Copied</span>
-                        ) : (
-                          <Share2 className="w-3.5 h-3.5" />
-                        )}
-                      </button>
-                    </div>
-                  </article>
-                </ScrollReveal>
-              ))}
-            </div>
           </>
         )}
       </section>
