@@ -148,6 +148,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // ----------------------------------------------------
   // FILE UPLOAD HELPER
   // ----------------------------------------------------
+  // Upload rules:
+  // - Audio files larger than 20 MB use the Netlify R2 presigned-upload function.
+  // - Smaller files first try authenticated Supabase Storage.
+  // - If direct Supabase upload is unavailable, use the existing server upload API.
   const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
     type: 'audio' | 'image',
@@ -155,65 +159,128 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     loadingSetter: (loading: boolean) => void,
     bucket: 'audio-files' | 'artwork-images' | 'news-images' = type === 'audio' ? 'audio-files' : 'artwork-images'
   ) => {
-    const file = e.target.files?.[0];
+    const input = e.currentTarget;
+    const file = input.files?.[0];
     if (!file) return;
+
+    const LARGE_AUDIO_LIMIT = 20 * 1024 * 1024;
+    const isLargeAudio = type === 'audio' && file.size > LARGE_AUDIO_LIMIT;
+    const fallbackContentType = type === 'audio' ? 'audio/mpeg' : 'image/jpeg';
+    const contentType = file.type || fallbackContentType;
+    const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const uniqueFileName = `${Date.now()}_${safeFileName}`;
 
     loadingSetter(true);
 
     try {
-      // 1. Direct Supabase Storage upload if authenticated session exists
+      // 1. Large audio: upload directly to Cloudflare R2 using a signed URL.
+      // The Netlify function must return { uploadUrl, fileUrl } (or publicUrl).
+      if (isLargeAudio) {
+        const signResponse = await fetch('/.netlify/functions/r2-upload-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fileName: uniqueFileName,
+            contentType,
+            fileSize: file.size,
+            bucket,
+          }),
+        });
+
+        const signData = await signResponse.json().catch(() => null);
+        if (!signResponse.ok || !signData?.uploadUrl) {
+          throw new Error(
+            signData?.message ||
+            signData?.error ||
+            `Cloudflare R2 could not create an upload link (HTTP ${signResponse.status}). Check the Netlify function and its environment variables.`
+          );
+        }
+
+        const uploadResponse = await fetch(signData.uploadUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': contentType },
+          body: file,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error(`Cloudflare R2 upload failed (HTTP ${uploadResponse.status}).`);
+        }
+
+        const uploadedFileUrl = signData.fileUrl || signData.publicUrl;
+        if (!uploadedFileUrl) {
+          throw new Error('R2 upload completed, but the server did not return fileUrl or publicUrl.');
+        }
+
+        setter(uploadedFileUrl);
+        showStatus('success', 'Large audio file uploaded successfully to Cloudflare R2.');
+        return;
+      }
+
+      // 2. Smaller files: try Supabase Storage when an authenticated session exists.
       try {
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (sessionData?.session) {
-          const fileExt = file.name.split('.').pop() || (type === 'audio' ? 'mp3' : 'jpg');
-          const cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-          const storagePath = `${Date.now()}_${cleanName}`;
-          
-          const { data: uploadData, error: uploadErr } = await supabase.storage
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (!sessionError && sessionData?.session) {
+          const storagePath = uniqueFileName;
+          const { data: uploadData, error: uploadError } = await supabase.storage
             .from(bucket)
             .upload(storagePath, file, {
-              contentType: file.type || (type === 'audio' ? 'audio/mpeg' : 'image/jpeg'),
+              contentType,
               upsert: true,
             });
 
-          if (!uploadErr && uploadData) {
-            const { data: pubData } = supabase.storage.from(bucket).getPublicUrl(storagePath);
-            if (pubData?.publicUrl) {
-              setter(pubData.publicUrl);
-              showStatus('success', `${type === 'audio' ? 'Audio file' : 'Image'} uploaded directly to Supabase storage (${bucket})!`);
-              loadingSetter(false);
+          if (!uploadError && uploadData) {
+            const { data: publicData } = supabase.storage
+              .from(bucket)
+              .getPublicUrl(uploadData.path || storagePath);
+
+            if (publicData?.publicUrl) {
+              setter(publicData.publicUrl);
+              showStatus('success', `${type === 'audio' ? 'Audio file' : 'Image'} uploaded to Supabase Storage (${bucket}).`);
               return;
             }
           }
+
+          if (uploadError) {
+            console.warn('Supabase Storage upload failed; trying server upload:', uploadError.message);
+          }
         }
-      } catch (clientErr) {
-        console.warn('Client Supabase direct upload fallback:', clientErr);
+      } catch (clientError) {
+        console.warn('Supabase direct upload unavailable; trying server upload:', clientError);
       }
 
-      // 2. Server upload with bucket parameter
+      // 3. Server fallback for smaller audio files and images.
       const formData = new FormData();
       formData.append('file', file);
       formData.append('bucket', bucket);
 
-      const res = await fetch(`/api/upload?bucket=${encodeURIComponent(bucket)}`, {
+      const response = await fetch(`/api/upload?bucket=${encodeURIComponent(bucket)}`, {
         method: 'POST',
         body: formData,
       });
-      const data = await res.json();
-      if (data.success && data.url) {
-        setter(data.url);
-        showStatus('success', `${type === 'audio' ? 'Audio file' : 'Image'} uploaded successfully! (${bucket})`);
-      } else {
-        showStatus('error', data.message || 'File upload failed');
+
+      const responseData = await response.json().catch(() => null);
+      if (!response.ok || !responseData?.success || !responseData?.url) {
+        throw new Error(
+          responseData?.message ||
+          responseData?.error ||
+          `Server upload failed (HTTP ${response.status}). Check that /api/upload is available on your deployed site.`
+        );
       }
-    } catch (err: any) {
-      showStatus('error', 'File upload error: ' + err.message);
+
+      setter(responseData.url);
+      showStatus('success', `${type === 'audio' ? 'Audio file' : 'Image'} uploaded successfully (${bucket}).`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown upload error.';
+      showStatus('error', `File upload failed: ${message}`);
     } finally {
       loadingSetter(false);
+      // Allow the same file to be selected and uploaded again if needed.
+      if (input) input.value = '';
     }
   };
 
   // ----------------------------------------------------
+
   // NEWS POSTS CRUD (DIRECT SUPABASE CLOUD PERSISTENCE)
   // ----------------------------------------------------
   const handleOpenCreateNews = () => {
