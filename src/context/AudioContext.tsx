@@ -33,14 +33,20 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const lastReportedSecondRef = useRef<number>(-1);
 
   useEffect(() => {
     const audio = new Audio();
-    audioRef.current = audio;
+    audio.preload = 'metadata';
     audio.volume = volume;
+    audioRef.current = audio;
 
     const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
+      const wholeSecond = Math.floor(audio.currentTime);
+      if (wholeSecond !== lastReportedSecondRef.current) {
+        lastReportedSecondRef.current = wholeSecond;
+        setCurrentTime(audio.currentTime);
+      }
     };
 
     const handleLoadedMetadata = () => {
@@ -49,6 +55,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const handleEnded = () => {
       setIsPlaying(false);
+      lastReportedSecondRef.current = 0;
       setCurrentTime(0);
     };
 
@@ -64,6 +71,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     return () => {
       audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
@@ -73,12 +82,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const playTrack = async (track: LiveMix | NonstopMix, type: 'live' | 'nonstop') => {
     if (!audioRef.current) return;
-    
 
     const trackWithMeta: CurrentTrack = { ...track, type };
     setCurrentTrack(trackWithMeta);
+    lastReportedSecondRef.current = 0;
+    setCurrentTime(0);
+    setDuration(0);
 
     try {
+      audioRef.current.pause();
       audioRef.current.src = track.audioUrl;
       audioRef.current.currentTime = 0;
       await audioRef.current.play();
@@ -103,10 +115,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const closePlayer = () => {
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+      audioRef.current.removeAttribute('src');
+      audioRef.current.load();
     }
     setIsPlaying(false);
+    lastReportedSecondRef.current = -1;
     setCurrentTime(0);
+    setDuration(0);
     setCurrentTrack(null);
   };
 
@@ -132,6 +147,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const seek = (seconds: number) => {
     if (audioRef.current) {
       audioRef.current.currentTime = seconds;
+      lastReportedSecondRef.current = Math.floor(seconds);
       setCurrentTime(seconds);
     }
   };
