@@ -155,6 +155,32 @@ function getSupabaseClient() {
   }
 }
 
+// Genuine play deduplication (prevents duplicate counting within 30 minutes per visitor/track)
+const PLAY_DEDUP_WINDOW_MS = 30 * 60 * 1000;
+const recentPlayRecords = new Map<string, number>();
+
+function canRecordPlay(type: 'live' | 'nonstop', id: string, visitorKey: string): boolean {
+  const now = Date.now();
+  // Periodic pruning so memory stays bounded
+  if (recentPlayRecords.size > 2000) {
+    for (const [k, ts] of recentPlayRecords.entries()) {
+      if (now - ts >= PLAY_DEDUP_WINDOW_MS) {
+        recentPlayRecords.delete(k);
+      }
+    }
+  }
+  const key = `${type}:${id}:${visitorKey}`;
+  const lastTs = recentPlayRecords.get(key);
+  if (lastTs && now - lastTs < PLAY_DEDUP_WINDOW_MS) {
+    return false;
+  }
+  return true;
+}
+
+function markPlayRecorded(type: 'live' | 'nonstop', id: string, visitorKey: string) {
+  recentPlayRecords.set(`${type}:${id}:${visitorKey}`, Date.now());
+}
+
 // ----------------------------------------------------
 // API ROUTES
 // ----------------------------------------------------
@@ -442,22 +468,61 @@ app.delete('/api/mixes/:id', async (req, res) => {
 
 app.post('/api/mixes/:id/play', async (req, res) => {
   const { id } = req.params;
+  const visitorKey = String(req.body?.visitorId || req.headers['x-visitor-id'] || req.ip || 'anon');
   const db = readDb();
-  const mix = db.liveMixes.find((m) => m.id === id);
-  if (mix) {
-    mix.playsCount = (mix.playsCount || 0) + 1;
-    saveDb(db);
+  const localMix = db.liveMixes.find((m) => m.id === id);
+  const supabase = getSupabaseClient();
 
-    const supabase = getSupabaseClient();
+  if (!canRecordPlay('live', id, visitorKey)) {
     if (supabase) {
       try {
-        await supabase.from('live_mixes').update({
-          plays_count: mix.playsCount,
-        }).eq('id', id);
+        const { data } = await supabase.from('live_mixes').select('plays_count').eq('id', id).maybeSingle();
+        if (data) {
+          return res.json({ success: true, counted: false, playsCount: data.plays_count || 0 });
+        }
       } catch {}
     }
+    return res.json({ success: true, counted: false, playsCount: localMix?.playsCount || 0 });
   }
-  return res.json({ success: true, playsCount: mix?.playsCount || 0 });
+
+  if (supabase) {
+    try {
+      const { data: existing } = await supabase
+        .from('live_mixes')
+        .select('id, plays_count')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (existing) {
+        const nextCount = (existing.plays_count || 0) + 1;
+        const { data: updatedRow, error: updateErr } = await supabase
+          .from('live_mixes')
+          .update({ plays_count: nextCount })
+          .eq('id', id)
+          .select('plays_count')
+          .maybeSingle();
+
+        if (!updateErr && updatedRow) {
+          markPlayRecorded('live', id, visitorKey);
+          if (localMix) {
+            localMix.playsCount = updatedRow.plays_count;
+            saveDb(db);
+          }
+          return res.json({ success: true, counted: true, playsCount: updatedRow.plays_count });
+        }
+        return res.json({ success: false, counted: false, playsCount: existing.plays_count || 0 });
+      }
+    } catch {}
+  }
+
+  if (localMix) {
+    localMix.playsCount = (localMix.playsCount || 0) + 1;
+    saveDb(db);
+    markPlayRecorded('live', id, visitorKey);
+    return res.json({ success: true, counted: true, playsCount: localMix.playsCount });
+  }
+
+  return res.json({ success: false, counted: false, playsCount: 0 });
 });
 
 app.post('/api/mixes/:id/like', async (req, res) => {
@@ -630,22 +695,61 @@ app.delete('/api/nonstops/:id', async (req, res) => {
 
 app.post('/api/nonstops/:id/play', async (req, res) => {
   const { id } = req.params;
+  const visitorKey = String(req.body?.visitorId || req.headers['x-visitor-id'] || req.ip || 'anon');
   const db = readDb();
-  const nonstop = db.nonstops.find((n) => n.id === id);
-  if (nonstop) {
-    nonstop.playsCount = (nonstop.playsCount || 0) + 1;
-    saveDb(db);
+  const localNonstop = db.nonstops.find((n) => n.id === id);
+  const supabase = getSupabaseClient();
 
-    const supabase = getSupabaseClient();
+  if (!canRecordPlay('nonstop', id, visitorKey)) {
     if (supabase) {
       try {
-        await supabase.from('nonstop_mixes').update({
-          plays_count: nonstop.playsCount,
-        }).eq('id', id);
+        const { data } = await supabase.from('nonstop_mixes').select('plays_count').eq('id', id).maybeSingle();
+        if (data) {
+          return res.json({ success: true, counted: false, playsCount: data.plays_count || 0 });
+        }
       } catch {}
     }
+    return res.json({ success: true, counted: false, playsCount: localNonstop?.playsCount || 0 });
   }
-  return res.json({ success: true, playsCount: nonstop?.playsCount || 0 });
+
+  if (supabase) {
+    try {
+      const { data: existing } = await supabase
+        .from('nonstop_mixes')
+        .select('id, plays_count')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (existing) {
+        const nextCount = (existing.plays_count || 0) + 1;
+        const { data: updatedRow, error: updateErr } = await supabase
+          .from('nonstop_mixes')
+          .update({ plays_count: nextCount })
+          .eq('id', id)
+          .select('plays_count')
+          .maybeSingle();
+
+        if (!updateErr && updatedRow) {
+          markPlayRecorded('nonstop', id, visitorKey);
+          if (localNonstop) {
+            localNonstop.playsCount = updatedRow.plays_count;
+            saveDb(db);
+          }
+          return res.json({ success: true, counted: true, playsCount: updatedRow.plays_count });
+        }
+        return res.json({ success: false, counted: false, playsCount: existing.plays_count || 0 });
+      }
+    } catch {}
+  }
+
+  if (localNonstop) {
+    localNonstop.playsCount = (localNonstop.playsCount || 0) + 1;
+    saveDb(db);
+    markPlayRecorded('nonstop', id, visitorKey);
+    return res.json({ success: true, counted: true, playsCount: localNonstop.playsCount });
+  }
+
+  return res.json({ success: false, counted: false, playsCount: 0 });
 });
 
 app.post('/api/nonstops/:id/like', async (req, res) => {

@@ -77,6 +77,7 @@ export default function App() {
   const [liveMixes, setLiveMixes] = useState<LiveMix[]>([]);
   const [nonstops, setNonstops] = useState<NonstopMix[]>([]);
   const [newsPosts, setNewsPosts] = useState<NewsPost[]>([]);
+  const [isLoadingContent, setIsLoadingContent] = useState<boolean>(true);
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>(() => {
     try {
       const raw = localStorage.getItem('dj_emma_comment_counts');
@@ -260,6 +261,8 @@ export default function App() {
       }
     } catch (err) {
       console.warn('Supabase data loading warning:', err);
+    } finally {
+      setIsLoadingContent(false);
     }
   };
 
@@ -279,7 +282,55 @@ export default function App() {
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Sync genuine play counts immediately when AudioContext records a confirmed play
+    const handlePlayRecorded = (event: Event) => {
+      const customEvent = event as CustomEvent<{
+        id: string;
+        type: 'live' | 'nonstop';
+        playsCount: number;
+      }>;
+      const detail = customEvent.detail;
+      if (!detail || typeof detail.playsCount !== 'number') return;
+
+      if (detail.type === 'live') {
+        setLiveMixes((prev) =>
+          prev.map((m) => (m.id === detail.id ? { ...m, playsCount: detail.playsCount } : m))
+        );
+      } else {
+        setNonstops((prev) =>
+          prev.map((n) => (n.id === detail.id ? { ...n, playsCount: detail.playsCount } : n))
+        );
+      }
+    };
+    window.addEventListener('dj-emma-play-recorded', handlePlayRecorded);
+
+    // Subscribe to Supabase Realtime updates so newly published articles/mixes appear automatically
+    const realtimeChannel = supabase
+      .channel('dj-emma-public-feed')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'news_posts' }, () => {
+        refreshAllData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_mixes' }, () => {
+        refreshAllData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'nonstop_mixes' }, () => {
+        refreshAllData();
+      })
+      .subscribe();
+
+    const handleVisibilityRefresh = () => {
+      if (document.visibilityState === 'visible') {
+        refreshAllData();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityRefresh);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('dj-emma-play-recorded', handlePlayRecorded);
+      document.removeEventListener('visibilitychange', handleVisibilityRefresh);
+      supabase.removeChannel(realtimeChannel);
+    };
   }, []);
 
   // Sync URL changes (both history popstate and hash) for back/forward and deep linking
@@ -487,6 +538,7 @@ export default function App() {
                   onLikeNews={handleLikeNews}
                   onOpenComments={handleOpenComments}
                   commentCounts={commentCounts}
+                  isLoadingContent={isLoadingContent}
                 />
               )}
 

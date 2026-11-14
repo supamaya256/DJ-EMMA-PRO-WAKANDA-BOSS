@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { Play, Pause, Search, Radio, Disc3, Heart, Calendar, PlusCircle, Share2, Check, MessageSquare } from 'lucide-react';
+import { Search, Radio, PlusCircle } from 'lucide-react';
 import { LiveMix } from '../types';
-import { useAudio } from '../context/AudioContext';
-import { isItemLikedByVisitor } from '../lib/visitor';
+import { ScrollReveal } from './ScrollReveal';
+import { NonstopsCarousel3D } from './NonstopsCarousel3D';
 
 interface LiveMixesSectionProps {
   mixes: LiveMix[];
   isAdmin: boolean;
   onOpenUpload: () => void;
   onLikeMix: (id: string) => void;
-  onOpenComments?: (id: string, type: 'live', title: string) => void;
+  onOpenComments?: (id: string, type: 'live' | 'nonstop', title: string) => void;
   commentCounts?: Record<string, number>;
 }
 
@@ -21,10 +21,8 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
   onOpenComments,
   commentCounts = {},
 }) => {
-  const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('ALL');
-  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const publishedMixes = mixes.filter((m) => m.isPublished);
 
@@ -40,53 +38,37 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
     return matchesSearch && matchesGenre;
   });
 
-  const handleShare = (mix: LiveMix) => {
-    navigator.clipboard?.writeText(window.location.origin + '?mix=' + mix.id);
-    setCopiedId(mix.id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-
-  const formatDate = (isoString: string) => {
-    try {
-      return new Date(isoString).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      });
-    } catch {
-      return 'Recent';
-    }
-  };
-
   return (
     <div className="w-full text-white pb-28 pt-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Header Banner */}
-      <div className="relative rounded-3xl royal-glass-card border-2 border-amber-400/50 p-6 sm:p-10 mb-8 overflow-hidden shadow-2xl">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 text-xs font-bold uppercase tracking-wider">
-              <Radio className="w-3.5 h-3.5 text-amber-400" />
-              <span>OFFICIAL LIVE SETS & CLUB ANTHEMS</span>
+      <ScrollReveal>
+        <div className="relative rounded-3xl royal-glass-card electric-gold-shimmer electric-blue-glow border-2 border-amber-400/50 p-6 sm:p-10 mb-8 overflow-hidden shadow-2xl">
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-sky-500/15 text-sky-300 border border-sky-400/40 text-xs font-bold uppercase tracking-wider">
+                <Radio className="w-3.5 h-3.5 text-amber-400" />
+                <span>OFFICIAL LIVE SETS & CLUB ANTHEMS</span>
+              </div>
+              <h1 className="text-3xl sm:text-5xl font-black gold-chrome-text font-display uppercase tracking-tight">
+                LIVE MIXES
+              </h1>
+              <p className="text-slate-300 text-sm sm:text-base max-w-2xl">
+                Stream live club performances, stage mixes, and high-energy party tapes recorded live by DJ EMMA PRO – THE WAKANDA BOSS.
+              </p>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black gold-chrome-text font-display uppercase tracking-tight">
-              LIVE MIXES
-            </h1>
-            <p className="text-slate-300 text-sm sm:text-base max-w-2xl">
-              Stream live club performances, stage mixes, and high-energy party tapes recorded live by DJ EMMA PRO – THE WAKANDA BOSS.
-            </p>
-          </div>
 
-          {isAdmin && (
-            <button
-              onClick={onOpenUpload}
-              className="self-start md:self-center px-6 py-3.5 rounded-full gold-btn font-extrabold text-sm uppercase tracking-wider flex items-center gap-2 shadow-xl hover:scale-105 transition cursor-pointer"
-            >
-              <PlusCircle className="w-5 h-5" />
-              <span>UPLOAD NEW LIVE MIX</span>
-            </button>
-          )}
+            {isAdmin && (
+              <button
+                onClick={onOpenUpload}
+                className="self-start md:self-center px-6 py-3.5 rounded-full gold-btn font-extrabold text-sm uppercase tracking-wider flex items-center gap-2 shadow-xl hover:scale-105 transition cursor-pointer"
+              >
+                <PlusCircle className="w-5 h-5" />
+                <span>UPLOAD NEW LIVE MIX</span>
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      </ScrollReveal>
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-8">
@@ -115,12 +97,12 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
             placeholder="Search live mixes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-full glass-card border border-white/20 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400"
+            className="w-full pl-10 pr-4 py-2 rounded-full glass-card border border-white/20 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none focus:border-sky-400"
           />
         </div>
       </div>
 
-      {/* Mixes List / Grid */}
+      {/* 3D Interactive Circular Live Mixes Gallery or Empty State */}
       {filteredMixes.length === 0 ? (
         <div className="rounded-2xl glass-card border border-white/15 p-12 text-center space-y-3">
           <Radio className="w-12 h-12 text-slate-500 mx-auto" />
@@ -135,7 +117,7 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
           {isAdmin && publishedMixes.length === 0 && (
             <button
               onClick={onOpenUpload}
-              className="mt-2 px-5 py-2.5 rounded-full bg-cyan-500 text-slate-950 font-extrabold text-xs uppercase tracking-wider inline-flex items-center gap-2 hover:scale-105 transition cursor-pointer"
+              className="mt-2 px-5 py-2.5 rounded-full gold-btn text-slate-950 font-extrabold text-xs uppercase tracking-wider inline-flex items-center gap-2 hover:scale-105 transition cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
               <span>UPLOAD FIRST LIVE MIX</span>
@@ -143,119 +125,15 @@ export const LiveMixesSection: React.FC<LiveMixesSectionProps> = ({
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredMixes.map((mix) => {
-            const isThisPlaying = currentTrack?.id === mix.id && isPlaying;
-            return (
-              <div
-                key={mix.id}
-                className="group rounded-2xl royal-glass-card overflow-hidden border border-amber-400/35 hover:border-amber-400 transition-all duration-300 hover:-translate-y-1 shadow-2xl flex flex-col justify-between"
-              >
-                {/* Artwork Top */}
-                <div>
-                  <div className="relative aspect-video w-full overflow-hidden bg-[#050916]">
-                    <img
-                      src={mix.coverUrl}
-                      alt={mix.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-                    {/* Central Play Trigger */}
-                    <button
-                      onClick={() => {
-                        if (currentTrack?.id === mix.id) {
-                          togglePlay();
-                        } else {
-                          playTrack(mix, 'live');
-                        }
-                      }}
-                      className="absolute inset-0 m-auto w-14 h-14 rounded-full gold-btn flex items-center justify-center shadow-2xl transition hover:scale-110 active:scale-95 cursor-pointer"
-                      title={isThisPlaying ? 'Pause' : 'Play live mix'}
-                    >
-                      {isThisPlaying ? (
-                        <Pause className="w-6 h-6 fill-slate-950" />
-                      ) : (
-                        <Play className="w-6 h-6 fill-slate-950 ml-1" />
-                      )}
-                    </button>
-
-                    {/* Genre Tag */}
-                    <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-950/80 text-amber-200 border border-amber-400/40 backdrop-blur-md">
-                      {mix.genre}
-                    </span>
-
-                    {/* Duration */}
-                    <span className="absolute bottom-3 right-3 px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-black/80 text-white border border-white/10">
-                      {mix.duration}
-                    </span>
-                  </div>
-
-                  {/* Body Content */}
-                  <div className="p-5">
-                    <div className="flex items-center gap-2 text-[11px] text-slate-400 mb-2">
-                      <Calendar className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>{formatDate(mix.createdAt)}</span>
-                      <span>•</span>
-                      <span>DJ EMMA PRO</span>
-                    </div>
-
-                    <h3 className="font-bold text-lg text-white group-hover:text-cyan-300 transition line-clamp-1 font-display">
-                      {mix.title}
-                    </h3>
-                    <p className="text-xs text-slate-300 line-clamp-2 mt-2 leading-relaxed">
-                      {mix.description}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Footer Controls: Comments, Likes, Plays, Share */}
-                <div className="px-5 pb-5 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
-                  <div className="flex items-center gap-2">
-                    <Disc3 className="w-4 h-4 text-cyan-400 animate-spin" />
-                    <span className="font-mono text-slate-300">{mix.playsCount} plays</span>
-                  </div>
-
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <button
-                      onClick={() => onOpenComments?.(mix.id, 'live', mix.title)}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-cyan-300 border border-white/10 transition text-xs cursor-pointer"
-                      title="View & post comments"
-                    >
-                      <MessageSquare className="w-3.5 h-3.5 text-cyan-400" />
-                      <span className="text-[11px]">Comments {commentCounts[mix.id] ? `(${commentCounts[mix.id]})` : ''}</span>
-                    </button>
-
-                    <button
-                      onClick={() => onLikeMix(mix.id)}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition active:scale-95 cursor-pointer ${
-                        isItemLikedByVisitor('dj_emma_liked_live', mix.id)
-                          ? 'bg-rose-500/25 text-rose-300 border-rose-400/50'
-                          : 'bg-white/5 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border-white/10'
-                      }`}
-                      title={isItemLikedByVisitor('dj_emma_liked_live', mix.id) ? 'Unlike mix' : 'Like this mix'}
-                    >
-                      <Heart className={`w-3.5 h-3.5 ${isItemLikedByVisitor('dj_emma_liked_live', mix.id) ? 'fill-rose-500 text-rose-400' : 'fill-rose-500/30 text-rose-400'}`} />
-                      <span className="font-bold text-white">{mix.likesCount}</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleShare(mix)}
-                      className="p-1.5 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer"
-                      title="Share mix"
-                    >
-                      {copiedId === mix.id ? (
-                        <Check className="w-4 h-4 text-emerald-400" />
-                      ) : (
-                        <Share2 className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <NonstopsCarousel3D
+          trackType="live"
+          items={filteredMixes}
+          onLikeItem={onLikeMix}
+          onOpenComments={onOpenComments}
+          commentCounts={commentCounts}
+          showTracklistInFocus={false}
+          showShareInFocus={true}
+        />
       )}
     </div>
   );

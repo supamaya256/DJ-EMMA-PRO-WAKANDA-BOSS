@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArtistInfo } from '../types';
 import { MapPin, Phone, Mail, MessageSquare, Sparkles, Disc, Radio, Palette, Headphones, Send, CheckCircle2 } from 'lucide-react';
+import { ScrollReveal } from './ScrollReveal';
 
 interface AboutSectionProps {
   artist: ArtistInfo;
@@ -42,9 +43,10 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
     <div className="w-full text-white pb-32 pt-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-12">
       
       {/* Top Hero Card with Original Portraits & Verified Details */}
-      <section className="relative rounded-3xl royal-glass-card p-6 sm:p-10 overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl pointer-events-none -ml-20 -mb-20" />
+      <ScrollReveal>
+        <section className="relative rounded-3xl royal-glass-card electric-gold-shimmer electric-blue-glow p-6 sm:p-10 overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-sky-500/10 rounded-full blur-3xl pointer-events-none -ml-20 -mb-20" />
 
         <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
@@ -171,6 +173,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
           </div>
         </div>
       </section>
+      </ScrollReveal>
 
       {/* SECTION 2: CREATIVE SERVICES */}
       <section className="space-y-6">
@@ -190,33 +193,35 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
           {artist.services.map((service, index) => {
             const Icon = getServiceIcon(service.title);
             return (
-              <div
-                key={service.id || index}
-                className="group rounded-2xl royal-glass-card p-6 border border-amber-400/20 hover:border-amber-400/60 transition-all duration-300 hover:-translate-y-1 shadow-xl flex flex-col justify-between"
-              >
-                <div>
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 flex items-center justify-center font-bold mb-4 shadow-lg group-hover:scale-110 transition-transform">
-                    <Icon className="w-6 h-6" />
+              <ScrollReveal key={service.id || index} delayMs={index * 70}>
+                <div
+                  className="group h-full rounded-2xl royal-glass-card card-3d-hover p-6 border border-amber-400/20 hover:border-amber-400/60 transition-all duration-300 shadow-xl flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-300 to-sky-400 text-slate-950 flex items-center justify-center font-bold mb-4 shadow-lg group-hover:scale-110 transition-transform">
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition font-display">
+                      {service.title}
+                    </h3>
+                    <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+                      {service.desc}
+                    </p>
                   </div>
-                  <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition font-display">
-                    {service.title}
-                  </h3>
-                  <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-                    {service.desc}
-                  </p>
-                </div>
 
-                <div className="pt-4 mt-4 border-t border-white/10 text-[11px] text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1">
-                  <span>Available for booking</span>
+                  <div className="pt-4 mt-4 border-t border-white/10 text-[11px] text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                    <span>Available for booking</span>
+                  </div>
                 </div>
-              </div>
+              </ScrollReveal>
             );
           })}
         </div>
       </section>
 
       {/* SECTION 3: PROFESSIONAL BOOKING & CONTACT */}
-      <section className="relative rounded-3xl royal-glass-card p-6 sm:p-10 overflow-hidden shadow-2xl">
+      <ScrollReveal>
+        <section className="relative rounded-3xl royal-glass-card electric-blue-glow p-6 sm:p-10 overflow-hidden shadow-2xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Contact Direct Channels */}
@@ -402,6 +407,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
           </div>
         </div>
       </section>
+      </ScrollReveal>
     </div>
   );
 };

@@ -50,7 +50,7 @@ export const GlobalAudioPlayer: React.FC = () => {
       {/* Top Slim Scrub / Progress Bar */}
       <div className="relative w-full h-1 sm:h-1.5 bg-white/10 hover:h-2 transition-all cursor-pointer overflow-hidden group">
         <div
-          className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-400 via-sky-300 to-white shadow-[0_0_12px_#38bdf8]"
+          className="absolute top-0 left-0 h-full bg-gradient-to-r from-sky-400 via-blue-400 to-amber-400 shadow-[0_0_12px_rgba(56,189,248,0.85)]"
           style={{ width: `${progressPercent}%` }}
         />
         <input
@@ -76,11 +76,11 @@ export const GlobalAudioPlayer: React.FC = () => {
               className="w-full h-full object-cover"
             />
             {isPlaying && (
-              <div className="absolute inset-0 bg-black/45 flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                 <div className="flex items-end gap-0.5 h-3.5">
-                  <span className="w-0.5 sm:w-1 bg-cyan-400 animate-pulse h-2" />
-                  <span className="w-0.5 sm:w-1 bg-sky-300 animate-pulse h-3.5" />
-                  <span className="w-0.5 sm:w-1 bg-cyan-400 animate-pulse h-2.5" />
+                  <span className="w-0.5 sm:w-1 bg-sky-400 eq-bar-1 h-3.5" />
+                  <span className="w-0.5 sm:w-1 bg-amber-400 eq-bar-2 h-3.5" />
+                  <span className="w-0.5 sm:w-1 bg-sky-300 eq-bar-3 h-3.5" />
                 </div>
               </div>
             )}
@@ -127,7 +127,9 @@ export const GlobalAudioPlayer: React.FC = () => {
             onClick={togglePlay}
             title={isPlaying ? 'Pause' : 'Play'}
             aria-label={isPlaying ? 'Pause playback' : 'Start playback'}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition border border-white/60 cursor-pointer"
+            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-b from-amber-300 to-yellow-500 text-slate-950 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition border cursor-pointer ${
+              isPlaying ? 'border-sky-300 ring-2 ring-sky-400/50' : 'border-white/60'
+            }`}
           >
             {isPlaying ? (
               <Pause className="w-4 h-4 fill-slate-950" />
