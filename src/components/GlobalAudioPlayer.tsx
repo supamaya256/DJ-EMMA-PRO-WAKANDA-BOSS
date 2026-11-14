@@ -184,12 +184,10 @@ export const GlobalAudioPlayer: React.FC = () => {
           {/* Download Mix Link */}
           {currentTrack.audioUrl && (
             <a
-              href={currentTrack.audioUrl}
-              download
-              target="_blank"
-              rel="noreferrer"
+              href={`/.netlify/functions/download-audio?url=${encodeURIComponent(currentTrack.audioUrl)}&title=${encodeURIComponent(currentTrack.title)}`}
+              download={`${currentTrack.title.replace(/[^a-zA-Z0-9._-]/g, '_')}.mp3`}
               title="Download Mix"
-              className="hidden sm:flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white transition border border-white/10"
+              className="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white transition border border-white/10"
               aria-label="Download audio mix"
             >
               <Download className="w-3.5 h-3.5" />
