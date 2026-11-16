@@ -17,7 +17,8 @@ import { CommentsModal } from './components/CommentsModal';
 import { PrivacyPolicySection } from './components/PrivacyPolicySection';
 import { TermsConditionsSection } from './components/TermsConditionsSection';
 import { CookieConsentBanner } from './components/CookieConsentBanner';
-import { ShieldCheck, FileText, Lock, Cookie } from 'lucide-react';
+import { ShieldCheck, FileText, Lock, Cookie, Instagram, Facebook, Youtube } from 'lucide-react';
+import { OFFICIAL_SOCIAL_LINKS, resolveSocialLinks, SnapchatIcon, TelegramIcon } from './components/SocialIcons';
 import { getVisitorId, toggleVisitorLikedId } from './lib/visitor';
 import { supabase } from './lib/supabase';
 
@@ -108,12 +109,7 @@ export default function App() {
     bookingWhatsapp: '+256788123456',
     avatarUrl: '/assets/aistudio/file_000000004a80821193402a6d1202b9b2_20123475.png',
     heroPortraitUrl: '/assets/aistudio/file_00000000577482118275a24f7cbcec0a_37ac2a88.png',
-    socialLinks: {
-      tiktok: 'https://tiktok.com/@djemmapro',
-      instagram: 'https://instagram.com/djemmapro',
-      youtube: 'https://youtube.com/@djemmapro',
-      facebook: 'https://facebook.com/djemmapro',
-    },
+    socialLinks: OFFICIAL_SOCIAL_LINKS,
     services: [
       { id: '1', title: 'Live Club & Concert DJ Mixing', desc: 'Electrifying crowd-pulling sets spanning Afrobeats, Dancehall, Amapiano & Ugandan hits.' },
       { id: '2', title: 'Custom DJ Drops & Intros', desc: 'Signature studio-grade DJ drops, radio jingles, and promotional voiceovers.' },
@@ -211,7 +207,7 @@ export default function App() {
           bookingWhatsapp: artistRes.data.booking_whatsapp || prev.bookingWhatsapp,
           avatarUrl: artistRes.data.avatar_url || prev.avatarUrl,
           heroPortraitUrl: artistRes.data.hero_portrait_url || prev.heroPortraitUrl,
-          socialLinks: artistRes.data.social_links || prev.socialLinks,
+          socialLinks: resolveSocialLinks(artistRes.data.social_links),
           services: artistRes.data.services || prev.services,
         }));
       }
@@ -706,6 +702,73 @@ export default function App() {
                     <span>{isAdminAuthenticated ? 'Admin Panel' : 'DJ Login'}</span>
                   </button>
                 </div>
+
+                {/* Official Social Media Bar in Footer */}
+                {(() => {
+                  const socials = resolveSocialLinks(artist.socialLinks);
+                  return (
+                    <div className="flex flex-wrap items-center justify-center gap-2.5 border-b border-white/10 pb-5">
+                      <span className="text-[10px] font-rainflow-condensed font-bold uppercase tracking-[0.22em] text-purple-200/70 mr-1">
+                        FOLLOW DJ EMMA PRO:
+                      </span>
+                      {socials.facebook && (
+                        <a
+                          href={socials.facebook}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3 py-1.5 bg-[#1b0833] hover:bg-[#ec1d64] text-white/90 hover:text-white border border-white/10 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition"
+                        >
+                          <Facebook className="w-3.5 h-3.5" />
+                          <span>Facebook</span>
+                        </a>
+                      )}
+                      {socials.instagram && (
+                        <a
+                          href={socials.instagram}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3 py-1.5 bg-[#1b0833] hover:bg-[#ec1d64] text-white/90 hover:text-white border border-white/10 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition"
+                        >
+                          <Instagram className="w-3.5 h-3.5" />
+                          <span>Instagram</span>
+                        </a>
+                      )}
+                      {socials.youtube && (
+                        <a
+                          href={socials.youtube}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3 py-1.5 bg-[#1b0833] hover:bg-[#ec1d64] text-white/90 hover:text-white border border-white/10 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition"
+                        >
+                          <Youtube className="w-3.5 h-3.5" />
+                          <span>YouTube</span>
+                        </a>
+                      )}
+                      {socials.snapchat && (
+                        <a
+                          href={socials.snapchat}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3 py-1.5 bg-[#1b0833] hover:bg-[#ec1d64] text-white/90 hover:text-white border border-white/10 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition"
+                        >
+                          <SnapchatIcon className="w-3.5 h-3.5" />
+                          <span>Snapchat</span>
+                        </a>
+                      )}
+                      {socials.telegram && (
+                        <a
+                          href={socials.telegram}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3 py-1.5 bg-[#1b0833] hover:bg-[#ec1d64] text-white/90 hover:text-white border border-white/10 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition"
+                        >
+                          <TelegramIcon className="w-3.5 h-3.5" />
+                          <span>Telegram</span>
+                        </a>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Mandatory Legal & Privacy Disclosures */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-purple-200/70">

@@ -11,6 +11,7 @@ import {
   Facebook,
 } from 'lucide-react';
 import { ArtistInfo } from '../types';
+import { SnapchatIcon, TelegramIcon, resolveSocialLinks } from './SocialIcons';
 import { ScrollReveal } from './ScrollReveal';
 
 interface ContactSectionProps {
@@ -131,49 +132,78 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ artist }) => {
             </div>
 
             <div className="pt-2 flex flex-wrap gap-2">
-              {artist.socialLinks.instagram && (
-                <a
-                  href={artist.socialLinks.instagram}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3.5 py-2 bg-[#1b0833] hover:bg-[#ec1d64] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border border-white/10 transition"
-                >
-                  <Instagram className="w-3.5 h-3.5" />
-                  <span>Instagram</span>
-                </a>
-              )}
-              {artist.socialLinks.youtube && (
-                <a
-                  href={artist.socialLinks.youtube}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3.5 py-2 bg-[#1b0833] hover:bg-[#ec1d64] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border border-white/10 transition"
-                >
-                  <Youtube className="w-3.5 h-3.5" />
-                  <span>YouTube</span>
-                </a>
-              )}
-              {artist.socialLinks.facebook && (
-                <a
-                  href={artist.socialLinks.facebook}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3.5 py-2 bg-[#1b0833] hover:bg-[#ec1d64] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border border-white/10 transition"
-                >
-                  <Facebook className="w-3.5 h-3.5" />
-                  <span>Facebook</span>
-                </a>
-              )}
-              {artist.socialLinks.tiktok && (
-                <a
-                  href={artist.socialLinks.tiktok}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3.5 py-2 bg-[#1b0833] hover:bg-[#ec1d64] text-xs font-bold uppercase tracking-wider border border-white/10 transition"
-                >
-                  TikTok
-                </a>
-              )}
+              {(() => {
+                const socials = resolveSocialLinks(artist.socialLinks);
+                return (
+                  <>
+                    {socials.facebook && (
+                      <a
+                        href={socials.facebook}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3.5 py-2 bg-[#1b0833] hover:bg-[#ec1d64] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border border-white/10 transition"
+                      >
+                        <Facebook className="w-3.5 h-3.5" />
+                        <span>Facebook</span>
+                      </a>
+                    )}
+                    {socials.instagram && (
+                      <a
+                        href={socials.instagram}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3.5 py-2 bg-[#1b0833] hover:bg-[#ec1d64] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border border-white/10 transition"
+                      >
+                        <Instagram className="w-3.5 h-3.5" />
+                        <span>Instagram</span>
+                      </a>
+                    )}
+                    {socials.youtube && (
+                      <a
+                        href={socials.youtube}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3.5 py-2 bg-[#1b0833] hover:bg-[#ec1d64] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border border-white/10 transition"
+                      >
+                        <Youtube className="w-3.5 h-3.5" />
+                        <span>YouTube</span>
+                      </a>
+                    )}
+                    {socials.snapchat && (
+                      <a
+                        href={socials.snapchat}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3.5 py-2 bg-[#1b0833] hover:bg-[#ec1d64] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border border-white/10 transition"
+                      >
+                        <SnapchatIcon className="w-3.5 h-3.5" />
+                        <span>Snapchat</span>
+                      </a>
+                    )}
+                    {socials.telegram && (
+                      <a
+                        href={socials.telegram}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3.5 py-2 bg-[#1b0833] hover:bg-[#ec1d64] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border border-white/10 transition"
+                      >
+                        <TelegramIcon className="w-3.5 h-3.5" />
+                        <span>Telegram</span>
+                      </a>
+                    )}
+                    {socials.tiktok && (
+                      <a
+                        href={socials.tiktok}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3.5 py-2 bg-[#1b0833] hover:bg-[#ec1d64] text-xs font-bold uppercase tracking-wider border border-white/10 transition"
+                      >
+                        TikTok
+                      </a>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>

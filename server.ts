@@ -72,10 +72,12 @@ const defaultData = {
     avatarUrl: '/assets/aistudio/file_000000004a80821193402a6d1202b9b2_20123475.png',
     heroPortraitUrl: '/assets/aistudio/file_00000000577482118275a24f7cbcec0a_37ac2a88.png',
     socialLinks: {
-      tiktok: 'https://tiktok.com/@djemmapro',
-      instagram: 'https://instagram.com/djemmapro',
-      youtube: 'https://youtube.com/@djemmapro',
-      facebook: 'https://facebook.com/djemmapro',
+      facebook: 'https://www.facebook.com/profile.php?id=100084323655178',
+      instagram: 'https://www.instagram.com/deejayemmap?obrf=MTl1dWdweTFyamQwdw==',
+      youtube: 'https://youtube.com/@djemmapro7231?si=t1P6hlNP3Cv1oss8',
+      snapchat: 'https://www.snapchat.com/add/emmapro257687?share_id=kvedjM2ogAQ&locale=en-GB',
+      telegram: 'https://t.me/wakandadeejays',
+      tiktok: '',
     },
     services: [
       { id: '1', title: 'Live Club & Concert DJ Mixing', desc: 'Electrifying crowd-pulling sets spanning Afrobeats, Dancehall, Amapiano & Ugandan hits.' },
@@ -817,7 +819,24 @@ app.get('/api/artist', async (_req, res) => {
           bookingWhatsapp: data.booking_whatsapp,
           avatarUrl: data.avatar_url,
           heroPortraitUrl: data.hero_portrait_url,
-          socialLinks: data.social_links || defaultData.artist.socialLinks,
+          socialLinks: (() => {
+            const raw = data.social_links || {};
+            const legacy = new Set([
+              'https://facebook.com/djemmapro',
+              'https://instagram.com/djemmapro',
+              'https://youtube.com/@djemmapro',
+              'https://tiktok.com/@djemmapro',
+            ]);
+            const d = defaultData.artist.socialLinks;
+            return {
+              facebook: !raw.facebook || legacy.has(raw.facebook) ? d.facebook : raw.facebook,
+              instagram: !raw.instagram || legacy.has(raw.instagram) ? d.instagram : raw.instagram,
+              youtube: !raw.youtube || legacy.has(raw.youtube) ? d.youtube : raw.youtube,
+              snapchat: !raw.snapchat ? d.snapchat : raw.snapchat,
+              telegram: !raw.telegram ? d.telegram : raw.telegram,
+              tiktok: raw.tiktok && !legacy.has(raw.tiktok) ? raw.tiktok : '',
+            };
+          })(),
           services: data.services || defaultData.artist.services,
         };
         return res.json(mapped);

@@ -58,10 +58,12 @@ export interface ArtistInfo {
   avatarUrl: string;
   heroPortraitUrl: string;
   socialLinks: {
-    tiktok: string;
+    facebook: string;
     instagram: string;
     youtube: string;
-    facebook: string;
+    snapchat?: string;
+    telegram?: string;
+    tiktok?: string;
   };
   services: CreativeService[];
 }

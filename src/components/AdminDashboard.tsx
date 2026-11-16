@@ -862,7 +862,7 @@ CREATE TABLE IF NOT EXISTS public.artist_info (
   booking_whatsapp TEXT NOT NULL DEFAULT '+256788123456',
   avatar_url TEXT DEFAULT '/assets/aistudio/file_000000004a80821193402a6d1202b9b2_20123475.png',
   hero_portrait_url TEXT DEFAULT '/assets/aistudio/file_00000000577482118275a24f7cbcec0a_37ac2a88.png',
-  social_links JSONB DEFAULT '{"tiktok": "https://tiktok.com/@djemmapro", "instagram": "https://instagram.com/djemmapro", "youtube": "https://youtube.com/@djemmapro", "facebook": "https://facebook.com/djemmapro"}'::jsonb,
+  social_links JSONB DEFAULT '{"facebook": "https://www.facebook.com/profile.php?id=100084323655178", "instagram": "https://www.instagram.com/deejayemmap?obrf=MTl1dWdweTFyamQwdw==", "youtube": "https://youtube.com/@djemmapro7231?si=t1P6hlNP3Cv1oss8", "snapchat": "https://www.snapchat.com/add/emmapro257687?share_id=kvedjM2ogAQ&locale=en-GB", "telegram": "https://t.me/wakandadeejays"}'::jsonb,
   services JSONB DEFAULT '[{"id": "1", "title": "Live Club & Concert DJ Mixing", "desc": "Electrifying crowd-pulling sets spanning Afrobeats, Dancehall, Amapiano & Ugandan hits."}, {"id": "2", "title": "Custom DJ Drops & Intros", "desc": "Signature studio-grade DJ drops, radio jingles, and promotional voiceovers."}, {"id": "3", "title": "Graphic Design & Creative Branding", "desc": "Album artwork, event flyers, social media kits, and 3D metallic logos."}, {"id": "4", "title": "Mixtape Production & Audio Mastering", "desc": "Seamlessly blended party tapes and pristine studio audio mastering."}]'::jsonb,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -2221,6 +2221,98 @@ CREATE POLICY "Admin delete comments" ON public.comments FOR DELETE USING (publi
                 onChange={(e) => setArtistForm({ ...artistForm, email: e.target.value })}
                 className="w-full px-4 py-2.5 rounded-xl glass-card border border-white/20 text-xs text-white focus:outline-none"
               />
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-white/10 space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-sky-300">
+              Official Social Media Links
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-300 mb-1 block">
+                  Facebook URL
+                </label>
+                <input
+                  type="url"
+                  value={artistForm.socialLinks.facebook || ''}
+                  onChange={(e) =>
+                    setArtistForm({
+                      ...artistForm,
+                      socialLinks: { ...artistForm.socialLinks, facebook: e.target.value },
+                    })
+                  }
+                  className="w-full px-4 py-2.5 rounded-xl glass-card border border-white/20 text-xs text-white focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-300 mb-1 block">
+                  Instagram URL
+                </label>
+                <input
+                  type="url"
+                  value={artistForm.socialLinks.instagram || ''}
+                  onChange={(e) =>
+                    setArtistForm({
+                      ...artistForm,
+                      socialLinks: { ...artistForm.socialLinks, instagram: e.target.value },
+                    })
+                  }
+                  className="w-full px-4 py-2.5 rounded-xl glass-card border border-white/20 text-xs text-white focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-300 mb-1 block">
+                  YouTube URL
+                </label>
+                <input
+                  type="url"
+                  value={artistForm.socialLinks.youtube || ''}
+                  onChange={(e) =>
+                    setArtistForm({
+                      ...artistForm,
+                      socialLinks: { ...artistForm.socialLinks, youtube: e.target.value },
+                    })
+                  }
+                  className="w-full px-4 py-2.5 rounded-xl glass-card border border-white/20 text-xs text-white focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-300 mb-1 block">
+                  Snapchat URL
+                </label>
+                <input
+                  type="url"
+                  value={artistForm.socialLinks.snapchat || ''}
+                  onChange={(e) =>
+                    setArtistForm({
+                      ...artistForm,
+                      socialLinks: { ...artistForm.socialLinks, snapchat: e.target.value },
+                    })
+                  }
+                  className="w-full px-4 py-2.5 rounded-xl glass-card border border-white/20 text-xs text-white focus:outline-none"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="text-xs font-semibold text-slate-300 mb-1 block">
+                  Telegram Channel URL
+                </label>
+                <input
+                  type="url"
+                  value={artistForm.socialLinks.telegram || ''}
+                  onChange={(e) =>
+                    setArtistForm({
+                      ...artistForm,
+                      socialLinks: { ...artistForm.socialLinks, telegram: e.target.value },
+                    })
+                  }
+                  className="w-full px-4 py-2.5 rounded-xl glass-card border border-white/20 text-xs text-white focus:outline-none"
+                />
+              </div>
             </div>
           </div>
         </form>
