@@ -374,12 +374,12 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
         className="relative w-full rounded-3xl royal-glass-card electric-blue-glow border-2 border-amber-400/45 overflow-hidden select-none flex items-center justify-center"
         aria-label={trackType === 'live' ? '3D Live Mixes circular carousel' : '3D Nonstops circular carousel'}
       >
-        {/* Subtle radial spotlight backdrop in royal-blue & gold */}
+        {/* Subtle radial spotlight backdrop in luxury black & metallic gold */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'radial-gradient(ellipse at 50% 54%, rgba(56, 189, 248, 0.16) 0%, rgba(245, 158, 11, 0.08) 38%, rgba(4, 8, 22, 0.65) 75%)',
+              'radial-gradient(ellipse at 50% 54%, rgba(212, 175, 55, 0.14) 0%, rgba(180, 120, 20, 0.06) 38%, rgba(5, 5, 7, 0.85) 75%)',
           }}
         />
 
@@ -391,7 +391,7 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
               width: `${Math.max(180, rx * 2 + cardWidth * 0.45)}px`,
               height: `${Math.max(60, ry * 2.1)}px`,
             }}
-            className="absolute pointer-events-none rounded-full border border-sky-400/20 shadow-[0_0_30px_rgba(56,189,248,0.12)]"
+            className="absolute pointer-events-none rounded-full border border-amber-400/25 shadow-[0_0_30px_rgba(212,175,55,0.1)]"
           />
         )}
 
@@ -434,18 +434,18 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
                 }}
                 aria-label={`Select ${trackType === 'live' ? 'live mix' : 'nonstop'} ${item.title}`}
                 style={{ width: `${cardWidth}px` }}
-                className={`absolute rounded-2xl overflow-hidden cursor-pointer transition-[border-color,box-shadow,opacity] duration-200 will-change-transform bg-[#060d22] border ${
+                className={`absolute rounded-xl overflow-hidden cursor-pointer transition-[border-color,box-shadow,opacity] duration-200 will-change-transform bg-[#0a0a0e] border ${
                   isThisPlaying
-                    ? 'border-sky-400 shadow-[0_0_26px_rgba(56,189,248,0.5),0_0_16px_rgba(245,158,11,0.35)]'
+                    ? 'border-amber-300 shadow-[0_0_26px_rgba(212,175,55,0.5),0_0_16px_rgba(245,158,11,0.3)]'
                     : isFront
-                      ? 'border-amber-400/85 shadow-[0_14px_34px_rgba(0,0,0,0.85),0_0_22px_rgba(245,158,11,0.28)]'
-                      : 'border-amber-400/35 shadow-[0_12px_28px_rgba(0,0,0,0.8)]'
+                      ? 'border-amber-400/85 shadow-[0_14px_34px_rgba(0,0,0,0.85),0_0_22px_rgba(212,175,55,0.24)]'
+                      : 'border-amber-500/25 shadow-[0_12px_28px_rgba(0,0,0,0.85)]'
                 }`}
               >
                 {/* Album Artwork */}
-                <div className="relative aspect-video w-full overflow-hidden bg-[#040816]">
+                <div className="relative aspect-video w-full overflow-hidden bg-[#050507]">
                   {isImgBroken || !item.coverUrl ? (
-                    <div className="w-full h-full bg-gradient-to-br from-[#0c1d4c] via-[#060c20] to-amber-900/40 flex flex-col items-center justify-center p-3 text-center">
+                    <div className="w-full h-full bg-gradient-to-br from-[#19150c] via-[#0b0b0f] to-[#050507] flex flex-col items-center justify-center p-3 text-center">
                       <Disc3 className="w-8 h-8 text-amber-300 mb-1" />
                       <span className="text-[11px] font-bold text-amber-200 line-clamp-1">
                         {item.title}
@@ -466,28 +466,28 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent pointer-events-none" />
 
                   {isThisPlaying && (
-                    <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-sky-500/95 text-slate-950 text-[9px] font-black uppercase tracking-wider flex items-center gap-1 shadow">
+                    <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-amber-400 text-black text-[9px] font-black uppercase tracking-wider flex items-center gap-1 shadow">
                       <div className="flex items-end gap-0.5 h-2.5">
-                        <span className="w-0.5 h-2.5 bg-slate-950 eq-bar-1" />
-                        <span className="w-0.5 h-2.5 bg-slate-950 eq-bar-2" />
-                        <span className="w-0.5 h-2.5 bg-slate-950 eq-bar-3" />
+                        <span className="w-0.5 h-2.5 bg-black eq-bar-1" />
+                        <span className="w-0.5 h-2.5 bg-black eq-bar-2" />
+                        <span className="w-0.5 h-2.5 bg-black eq-bar-3" />
                       </div>
                       <span>PLAYING</span>
                     </div>
                   )}
 
-                  <span className="absolute bottom-1.5 right-2 text-[10px] font-mono font-bold text-amber-300 bg-black/75 px-1.5 py-0.5 rounded">
+                  <span className="absolute bottom-1.5 right-2 text-[10px] font-mono font-bold text-amber-300 bg-black/80 px-1.5 py-0.5 rounded-sm">
                     {item.duration}
                   </span>
                 </div>
 
                 {/* Compact Cover Footer */}
-                <div className="px-3 py-2 bg-gradient-to-b from-[#091536] to-[#050a1a] border-t border-white/10">
+                <div className="px-3 py-2 bg-gradient-to-b from-[#111116] to-[#070709] border-t border-white/10">
                   <h4 className="text-xs sm:text-sm font-bold text-white truncate font-display">
                     {item.title}
                   </h4>
-                  <div className="flex items-center justify-between text-[10px] text-slate-300 mt-0.5 font-mono">
-                    <span className="text-sky-300 truncate max-w-[55%]">{item.genre}</span>
+                  <div className="flex items-center justify-between text-[10px] text-neutral-300 mt-0.5 font-mono">
+                    <span className="text-amber-200/80 truncate max-w-[55%]">{item.genre}</span>
                     <span className="text-amber-300">{item.playsCount} plays</span>
                   </div>
                 </div>
@@ -506,12 +506,12 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
               }
             }}
             onClick={(e) => e.stopPropagation()}
-            className="animate-carousel-focus-in absolute z-[60] inset-x-3 sm:inset-x-auto w-auto sm:w-full max-w-md max-h-[92%] overflow-y-auto rounded-2xl bg-gradient-to-b from-[#0b193d]/98 via-[#07112b]/98 to-[#040917]/98 backdrop-blur-xl border-2 border-amber-400/85 shadow-[0_24px_60px_rgba(0,0,0,0.95),0_0_38px_rgba(56,189,248,0.35)]"
+            className="animate-carousel-focus-in absolute z-[60] inset-x-3 sm:inset-x-auto w-auto sm:w-full max-w-md max-h-[92%] overflow-y-auto rounded-2xl bg-gradient-to-b from-[#131318]/98 via-[#0c0c10]/98 to-[#060608]/98 backdrop-blur-xl border-2 border-amber-400/80 shadow-[0_24px_60px_rgba(0,0,0,0.95),0_0_32px_rgba(212,175,55,0.28)]"
           >
             {/* Enlarged Album Artwork & Original Play Controls */}
-            <div className="relative aspect-video w-full overflow-hidden bg-[#040816]">
+            <div className="relative aspect-video w-full overflow-hidden bg-[#050507]">
               {brokenImages[activeItem.id] || !activeItem.coverUrl ? (
-                <div className="w-full h-full bg-gradient-to-br from-[#0c1d4c] via-[#060c20] to-amber-900/40 flex flex-col items-center justify-center p-4">
+                <div className="w-full h-full bg-gradient-to-br from-[#19150c] via-[#0b0b0f] to-[#050507] flex flex-col items-center justify-center p-4">
                   <Disc3 className="w-12 h-12 text-amber-300 mb-2" />
                   <span className="text-sm font-bold text-amber-200">{activeItem.title}</span>
                 </div>
@@ -536,7 +536,7 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
                   }
                 }}
                 className={`absolute inset-0 m-auto w-14 h-14 rounded-full gold-btn flex items-center justify-center shadow-2xl transition hover:scale-110 active:scale-95 cursor-pointer ${
-                  currentTrack?.id === activeItem.id && isPlaying ? 'ring-4 ring-sky-400/70' : ''
+                  currentTrack?.id === activeItem.id && isPlaying ? 'ring-4 ring-amber-300/60' : ''
                 }`}
                 title={
                   currentTrack?.id === activeItem.id && isPlaying
@@ -545,14 +545,14 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
                 }
               >
                 {currentTrack?.id === activeItem.id && isPlaying ? (
-                  <Pause className="w-6 h-6 fill-slate-950" />
+                  <Pause className="w-6 h-6 fill-black" />
                 ) : (
-                  <Play className="w-6 h-6 fill-slate-950 ml-1" />
+                  <Play className="w-6 h-6 fill-black ml-1" />
                 )}
               </button>
 
               {/* Genre Tag */}
-              <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-950/85 text-sky-200 border border-sky-400/40 backdrop-blur-md">
+              <span className="absolute top-3 left-3 px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-black/85 text-amber-300 border border-amber-400/40 backdrop-blur-md">
                 {activeItem.genre}
               </span>
 
@@ -565,21 +565,21 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
                 }}
                 aria-label="Return album to carousel"
                 title="Return to carousel"
-                className="cursor-pointer absolute top-3 right-3 w-8 h-8 rounded-full bg-black/75 hover:bg-amber-400 text-white hover:text-slate-950 border border-white/25 flex items-center justify-center transition shadow-lg"
+                className="cursor-pointer absolute top-3 right-3 w-8 h-8 rounded-full bg-black/75 hover:bg-amber-400 text-white hover:text-black border border-white/25 flex items-center justify-center transition shadow-lg"
               >
                 <X className="w-4 h-4" />
               </button>
 
               {/* Duration */}
-              <span className="absolute bottom-2.5 right-3 px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-black/80 text-amber-300 border border-amber-400/40">
+              <span className="absolute bottom-2.5 right-3 px-2 py-0.5 rounded-sm text-[11px] font-mono font-bold bg-black/85 text-amber-300 border border-amber-400/40">
                 {activeItem.duration}
               </span>
             </div>
 
             {/* Normal Enlarged Body Content */}
             <div className="p-4 sm:p-5 space-y-2.5">
-              <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                <Calendar className="w-3.5 h-3.5 text-sky-400" />
+              <div className="flex items-center gap-2 text-[11px] text-neutral-400">
+                <Calendar className="w-3.5 h-3.5 text-amber-400" />
                 <span>{formatDate(activeItem.createdAt)}</span>
                 <span>·</span>
                 <span className="text-amber-300 font-semibold">
@@ -592,7 +592,7 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
               </h3>
 
               {activeItem.description && (
-                <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-line line-clamp-3">
+                <p className="text-xs text-neutral-300 leading-relaxed whitespace-pre-line line-clamp-3">
                   {activeItem.description}
                 </p>
               )}
@@ -605,10 +605,10 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
                       e.stopPropagation();
                       setIsExpandedTracklist((prev) => !prev);
                     }}
-                    className="flex items-center justify-between w-full text-xs font-semibold text-sky-300 hover:text-amber-300 transition py-1 cursor-pointer"
+                    className="flex items-center justify-between w-full text-xs font-semibold text-amber-300 hover:text-amber-200 transition py-1 cursor-pointer"
                   >
                     <span className="flex items-center gap-1.5">
-                      <ListMusic className="w-4 h-4 text-sky-400" />
+                      <ListMusic className="w-4 h-4 text-amber-400" />
                       <span>Tracklist ({activeTracklist.length} tracks)</span>
                     </span>
                     {isExpandedTracklist ? (
@@ -619,7 +619,7 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
                   </button>
 
                   {isExpandedTracklist && (
-                    <div className="mt-1.5 pl-2 space-y-1 text-[11px] text-slate-300 bg-black/40 p-2 rounded-lg border border-white/10 max-h-28 overflow-y-auto">
+                    <div className="mt-1.5 pl-2 space-y-1 text-[11px] text-neutral-300 bg-black/50 p-2 rounded-lg border border-amber-500/20 max-h-28 overflow-y-auto">
                       {activeTracklist.map((tr, trIdx) => (
                         <div key={trIdx} className="truncate">
                           {tr}
@@ -631,12 +631,12 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
               )}
 
               {/* Footer Controls: Plays, Comments, Likes, Optional Share */}
-              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-300 gap-2">
+              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs text-neutral-300 gap-2">
                 <div className="flex items-center gap-1.5 font-mono text-amber-300">
                   <Disc3
                     className={`w-4 h-4 ${
                       currentTrack?.id === activeItem.id && isPlaying
-                        ? 'text-sky-400 animate-spin'
+                        ? 'text-amber-300 animate-spin'
                         : 'text-amber-400'
                     }`}
                   />
@@ -649,10 +649,10 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
                       e.stopPropagation();
                       onOpenComments?.(activeItem.id, trackType, activeItem.title);
                     }}
-                    className="cursor-pointer flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/5 hover:bg-white/15 text-slate-200 hover:text-sky-300 border border-white/10 transition text-xs"
+                    className="cursor-pointer flex items-center gap-1 px-2.5 py-1 rounded-sm bg-white/5 hover:bg-amber-400/15 text-neutral-200 hover:text-amber-300 border border-white/10 transition text-xs"
                     title="View & post comments"
                   >
-                    <MessageSquare className="w-3.5 h-3.5 text-sky-400" />
+                    <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
                     <span className="text-[11px]">
                       Comments{' '}
                       {commentCounts[activeItem.id]
@@ -666,10 +666,10 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
                       e.stopPropagation();
                       handleLike(activeItem.id);
                     }}
-                    className={`cursor-pointer flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition active:scale-95 ${
+                    className={`cursor-pointer flex items-center gap-1.5 px-2.5 py-1 rounded-sm border transition active:scale-95 ${
                       isItemLikedByVisitor(likedStorageKey, activeItem.id)
-                        ? 'bg-rose-500/25 text-rose-300 border-rose-400/50'
-                        : 'bg-white/5 hover:bg-rose-500/20 text-slate-200 hover:text-rose-300 border-white/10'
+                        ? 'bg-amber-400/20 text-amber-300 border-amber-400/60'
+                        : 'bg-white/5 hover:bg-amber-400/15 text-neutral-200 hover:text-amber-300 border-white/10'
                     }`}
                     title={
                       isItemLikedByVisitor(likedStorageKey, activeItem.id)
@@ -680,8 +680,8 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
                     <Heart
                       className={`w-3.5 h-3.5 ${
                         isItemLikedByVisitor(likedStorageKey, activeItem.id)
-                          ? 'fill-rose-500 text-rose-400'
-                          : 'fill-rose-500/30 text-rose-400'
+                          ? 'fill-amber-400 text-amber-400'
+                          : 'text-amber-400/80'
                       }`}
                     />
                     <span className="font-bold text-white">{activeItem.likesCount}</span>
@@ -712,11 +712,11 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
 
       {/* CLEAN INTERACTIVE CAROUSEL CONTROLS & ALBUM DOTS */}
       <div className="flex flex-wrap items-center justify-between gap-3 px-1">
-        <div className="flex items-center gap-2 text-xs text-slate-300">
+        <div className="flex items-center gap-2 text-xs text-neutral-300">
           {trackType === 'live' ? (
-            <Radio className="w-4 h-4 text-sky-400 shrink-0" />
+            <Radio className="w-4 h-4 text-amber-400 shrink-0" />
           ) : (
-            <Music className="w-4 h-4 text-sky-400 shrink-0" />
+            <Music className="w-4 h-4 text-amber-400 shrink-0" />
           )}
           <span>
             {count}{' '}
@@ -729,7 +729,7 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
                 : 'Nonstop Sessions'}
           </span>
           <span aria-hidden="true" className="text-amber-400">·</span>
-          <span className="text-slate-400">
+          <span className="text-neutral-400">
             {activeItem
               ? 'Paused on selected album'
               : 'Hover or tap any album cover to open player'}
@@ -741,7 +741,7 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
             <button
               onClick={() => handleStep(-1)}
               aria-label={`Previous ${trackType === 'live' ? 'live mix' : 'nonstop'} album`}
-              className="cursor-pointer w-8 h-8 rounded-full bg-white/5 hover:bg-sky-500/20 text-sky-300 border border-sky-400/35 flex items-center justify-center transition"
+              className="cursor-pointer w-8 h-8 rounded-full bg-white/5 hover:bg-amber-400/20 text-amber-300 border border-amber-400/35 flex items-center justify-center transition"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -762,9 +762,9 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
                     }}
                     title={n.title}
                     aria-label={`Open ${n.title}`}
-                    className={`cursor-pointer h-2 rounded-full transition-all ${
+                    className={`cursor-pointer h-1.5 transition-all ${
                       isActive
-                        ? 'w-6 bg-gradient-to-r from-sky-400 to-amber-400 shadow-[0_0_10px_rgba(56,189,248,0.65)]'
+                        ? 'w-6 bg-gradient-to-r from-amber-200 to-amber-500 shadow-[0_0_10px_rgba(212,175,55,0.65)]'
                         : 'w-2 bg-white/25 hover:bg-amber-300/70'
                     }`}
                   />
@@ -775,7 +775,7 @@ export const NonstopsCarousel3D: React.FC<NonstopsCarousel3DProps> = ({
             <button
               onClick={() => handleStep(1)}
               aria-label={`Next ${trackType === 'live' ? 'live mix' : 'nonstop'} album`}
-              className="cursor-pointer w-8 h-8 rounded-full bg-white/5 hover:bg-sky-500/20 text-sky-300 border border-sky-400/35 flex items-center justify-center transition"
+              className="cursor-pointer w-8 h-8 rounded-full bg-white/5 hover:bg-amber-400/20 text-amber-300 border border-amber-400/35 flex items-center justify-center transition"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Search, Music, PlusCircle } from 'lucide-react';
 import { NonstopMix } from '../types';
 import { ScrollReveal } from './ScrollReveal';
-import { NonstopsCarousel3D } from './NonstopsCarousel3D';
+import { MixCardRainflow } from './MixCardRainflow';
 
 interface NonstopsSectionProps {
   nonstops: NonstopMix[];
@@ -34,30 +34,28 @@ export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
   });
 
   return (
-    <div className="w-full text-white pb-28 pt-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      {/* Banner */}
+    <div className="w-full text-white pb-24 pt-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <ScrollReveal>
-        <div className="relative rounded-3xl royal-glass-card electric-gold-shimmer electric-blue-glow border-2 border-amber-400/50 p-6 sm:p-10 mb-8 overflow-hidden shadow-2xl">
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="bg-[#16072b] border-l-4 border-[#ec1d64] border-y border-r border-white/10 p-6 sm:p-10 mb-10 shadow-2xl">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-sky-500/15 text-sky-300 border border-sky-400/40 text-xs font-bold uppercase tracking-wider">
-                <Music className="w-3.5 h-3.5 text-amber-400" />
-                <span>UNINTERRUPTED PARTY SESSIONS • EXCLUSIVE NONSTOPS</span>
-              </div>
-              <h1 className="text-3xl sm:text-5xl font-black gold-chrome-text font-display uppercase tracking-tight">
+              <span className="text-xs font-rainflow-condensed font-bold uppercase tracking-[0.22em] text-[#ec1d64]">
+                UNINTERRUPTED MARATHON PARTY SESSIONS
+              </span>
+              <h1 className="font-display font-black text-3xl sm:text-5xl text-white uppercase tracking-tight">
                 NONSTOP MIXES
               </h1>
-              <p className="text-slate-300 text-sm sm:text-base max-w-2xl">
-                Continuous, high-octane nonstop mixes curated with track-by-track transitions by DJ EMMA PRO. Separate collection dedicated strictly to marathon party sessions.
+              <p className="text-purple-100/80 text-sm sm:text-base max-w-2xl">
+                Continuous nonstop mixes curated with seamless transitions and full tracklists by DJ EMMA PRO.
               </p>
             </div>
 
             {isAdmin && (
               <button
                 onClick={onOpenUpload}
-                className="self-start md:self-center px-6 py-3.5 rounded-full gold-btn font-extrabold text-sm uppercase tracking-wider flex items-center gap-2 shadow-xl hover:scale-105 transition cursor-pointer"
+                className="self-start md:self-center px-6 py-3.5 gold-btn font-rainflow-condensed font-bold text-xs uppercase tracking-[0.18em] flex items-center gap-2 shadow-xl cursor-pointer"
               >
-                <PlusCircle className="w-5 h-5" />
+                <PlusCircle className="w-4 h-4" />
                 <span>UPLOAD NEW NONSTOP</span>
               </button>
             )}
@@ -65,44 +63,42 @@ export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
         </div>
       </ScrollReveal>
 
-      {/* Search Header */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-8">
-        <div className="flex items-center gap-2 text-xs text-slate-300">
-          <span className="font-semibold text-amber-300">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-10">
+        <div className="flex items-center gap-2 text-xs text-purple-200">
+          <span className="font-semibold text-pink-300">
             Total Sessions: {publishedNonstops.length}
           </span>
-          <span aria-hidden="true" className="text-sky-400">·</span>
-          <span className="text-sky-300 font-semibold">100% Non-Stop</span>
+          <span aria-hidden="true" className="text-[#ec1d64]">·</span>
+          <span>100% Continuous Mixing</span>
         </div>
 
         <div className="relative min-w-[260px] sm:w-72">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-pink-300" />
           <input
             type="text"
             placeholder="Search nonstop mixes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-full glass-card border border-white/20 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none focus:border-sky-400"
+            className="w-full pl-10 pr-4 py-2.5 bg-[#16072b] border border-[#ec1d64]/35 text-xs sm:text-sm text-white placeholder-purple-300/50 focus:outline-none focus:border-[#ec1d64]"
           />
         </div>
       </div>
 
-      {/* 3D Interactive Circular Nonstops Gallery or Empty State */}
       {filtered.length === 0 ? (
-        <div className="rounded-2xl glass-card border border-white/15 p-12 text-center space-y-3">
-          <Music className="w-12 h-12 text-slate-500 mx-auto" />
-          <h3 className="text-lg font-bold text-white font-display">
+        <div className="bg-[#16072b] border border-white/10 p-12 text-center space-y-3">
+          <Music className="w-12 h-12 text-[#ec1d64]/60 mx-auto" />
+          <h3 className="text-lg font-bold text-white">
             {publishedNonstops.length === 0 ? 'No Nonstops Published Yet' : 'No Nonstops Match Your Search'}
           </h3>
-          <p className="text-xs text-slate-400 max-w-md mx-auto">
+          <p className="text-xs text-purple-200/75 max-w-md mx-auto">
             {publishedNonstops.length === 0
-              ? 'Real nonstop mixes and marathon party sessions by DJ EMMA PRO will appear here as soon as they are uploaded.'
+              ? 'Real nonstop mixes by DJ EMMA PRO will appear here as soon as they are uploaded.'
               : 'Check back soon or adjust your search filter.'}
           </p>
           {isAdmin && publishedNonstops.length === 0 && (
             <button
               onClick={onOpenUpload}
-              className="mt-2 px-5 py-2.5 rounded-full gold-btn text-slate-950 font-extrabold text-xs uppercase tracking-wider inline-flex items-center gap-2 hover:scale-105 transition cursor-pointer"
+              className="mt-2 px-5 py-2.5 gold-btn text-white font-bold text-xs uppercase tracking-wider inline-flex items-center gap-2 cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
               <span>UPLOAD FIRST NONSTOP</span>
@@ -110,13 +106,19 @@ export const NonstopsSection: React.FC<NonstopsSectionProps> = ({
           )}
         </div>
       ) : (
-        <NonstopsCarousel3D
-          nonstops={filtered}
-          onLikeNonstop={onLikeNonstop}
-          onOpenComments={onOpenComments}
-          commentCounts={commentCounts}
-          showTracklistInFocus={true}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filtered.map((item) => (
+            <MixCardRainflow
+              key={item.id}
+              mix={item}
+              trackType="nonstop"
+              onLike={onLikeNonstop}
+              onOpenComments={onOpenComments}
+              commentCount={commentCounts[item.id] || 0}
+              showTracklist={true}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

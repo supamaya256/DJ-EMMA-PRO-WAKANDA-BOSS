@@ -1,142 +1,166 @@
-import React from 'react';
-import { Home, Play, Music, User, ShieldCheck } from 'lucide-react';
-import { ActiveTab } from '../types';
+import React, { useState } from 'react';
+import { ShieldCheck, Menu, X, Instagram, Youtube, Facebook } from 'lucide-react';
+import { ActiveTab, ArtistInfo } from '../types';
 
 interface TopNavBarProps {
   activeTab: ActiveTab;
   onTabChange: (tab: ActiveTab) => void;
   isAdmin?: boolean;
   onOpenAdmin: () => void;
+  socialLinks?: ArtistInfo['socialLinks'];
 }
+
+const NAV_ITEMS: Array<{ id: ActiveTab; label: string }> = [
+  { id: 'home', label: 'HOME' },
+  { id: 'live-mixes', label: 'LIVE MIXES' },
+  { id: 'nonstops', label: 'NONSTOP MIXES' },
+  { id: 'news', label: 'NEWS' },
+  { id: 'about-me', label: 'ABOUT ME' },
+  { id: 'gallery', label: 'GALLERY' },
+  { id: 'contact', label: 'CONTACT' },
+];
 
 export const TopNavBar: React.FC<TopNavBarProps> = ({
   activeTab,
   onTabChange,
   isAdmin = false,
   onOpenAdmin,
+  socialLinks,
 }) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const handleNavClick = (tab: ActiveTab) => {
+    setMobileMenuOpen(false);
     onTabChange(tab);
-    // Smooth scroll into content area if scrolling through sections
-    setTimeout(() => {
-      const sectionEl = document.getElementById('dashboard-content-area');
-      if (sectionEl) {
-        sectionEl.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 50);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <header className="sticky top-0 z-50 w-full royal-nav-bar transition-all">
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 flex items-center justify-between gap-1.5 sm:gap-4">
-        
-        {/* LEFT: Brand Identity & DJ Portrait */}
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 h-16 sm:h-20 flex items-center justify-between gap-4">
+        {/* LEFT: DJ Rainflow-Inspired Cyan-Purple-Magenta Monogram Brand Lockup */}
         <button
           onClick={() => handleNavClick('home')}
-          className="flex items-center gap-1.5 sm:gap-2.5 group focus:outline-none shrink-0 cursor-pointer text-left"
+          className="flex flex-col items-start leading-none focus:outline-none shrink-0 cursor-pointer group whitespace-nowrap"
           aria-label="DJ EMMA PRO Home"
-          title="DJ EMMA PRO - The Wakanda Boss"
         >
-          {/* Circular Metallic Gold Profile Badge */}
-          <div className="relative w-7 h-7 xs:w-8 xs:h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full overflow-hidden ring-1.5 sm:ring-2 ring-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.5)] group-hover:ring-yellow-300 transition-all bg-[#0a1228] shrink-0">
-            <img
-              src="/assets/aistudio/file_000000004a80821193402a6d1202b9b2_20123475.png"
-              alt="DJ EMMA PRO"
-              className="w-[280%] h-[280%] max-w-none object-cover absolute -top-[25%] -left-[45%] pointer-events-none"
-            />
-          </div>
-
-          {/* 3D Shiny Metallic Gold Logo Text */}
-          <div className="flex flex-col text-left leading-none">
-            <span className="font-display font-black text-xs xs:text-sm sm:text-base md:text-lg tracking-tight sm:tracking-wider gold-chrome-text whitespace-nowrap group-hover:brightness-125 transition">
-              DJ EMMA<span className="hidden xs:inline"> PRO</span>
-            </span>
-            <span className="text-[8px] sm:text-[9px] md:text-[10px] font-bold text-amber-300/80 tracking-widest uppercase whitespace-nowrap hidden lg:inline mt-0.5">
-              THE WAKANDA BOSS
-            </span>
-          </div>
+          <span className="font-display font-black text-2xl sm:text-3xl tracking-tight rainflow-logo-gradient group-hover:brightness-110 transition">
+            DJ E
+          </span>
+          <span className="font-rainflow-condensed text-[9px] sm:text-[10px] tracking-[0.34em] text-purple-200/85 uppercase mt-0.5">
+            EMMA PRO
+          </span>
         </button>
 
-        {/* CENTER / RIGHT: Sole Navigation Menu */}
+        {/* CENTER: Clean Single-Line Navigation Menu (All 7 Requested Pages) */}
         <nav
-          className="flex items-center gap-1 sm:gap-1.5 md:gap-2 shrink-0 py-0.5"
+          className="hidden lg:flex items-center gap-6 xl:gap-8"
           aria-label="Main Navigation"
         >
-          {/* 1. HOME BUTTON */}
-          <button
-            onClick={() => handleNavClick('home')}
-            className={`cursor-pointer px-1.5 xs:px-2.5 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-[10px] xs:text-[11px] sm:text-xs font-bold tracking-wider flex items-center gap-1 sm:gap-1.5 transition-all duration-300 whitespace-nowrap shrink-0 ${
-              activeTab === 'home'
-                ? 'royal-nav-active font-black'
-                : 'text-slate-200 hover:text-amber-300 hover:bg-amber-400/10 active:bg-amber-400/20 border border-transparent'
-            }`}
-            title="HOME"
-          >
-            <Home className={`w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 shrink-0 ${activeTab === 'home' ? 'text-amber-300' : 'text-slate-300'}`} />
-            <span>HOME</span>
-          </button>
+          {NAV_ITEMS.map((item) => {
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.id)}
+                className={`cursor-pointer py-2 font-rainflow-condensed text-xs xl:text-[13px] font-semibold uppercase tracking-[0.14em] whitespace-nowrap shrink-0 transition-colors ${
+                  isActive
+                    ? 'royal-nav-active'
+                    : 'text-white/90 hover:text-[#ff4785] border-b-2 border-transparent'
+                }`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </nav>
 
-          {/* 2. LIVE MIXES BUTTON */}
-          <button
-            onClick={() => handleNavClick('live-mixes')}
-            className={`cursor-pointer px-1.5 xs:px-2.5 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-[10px] xs:text-[11px] sm:text-xs font-bold tracking-wider flex items-center gap-1 sm:gap-1.5 transition-all duration-300 whitespace-nowrap shrink-0 ${
-              activeTab === 'live-mixes'
-                ? 'royal-nav-active font-black'
-                : 'text-slate-200 hover:text-amber-300 hover:bg-amber-400/10 active:bg-amber-400/20 border border-transparent'
-            }`}
-            title="LIVE MIXES"
-          >
-            <Play className={`w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 shrink-0 fill-current ${activeTab === 'live-mixes' ? 'text-amber-300' : 'text-amber-400'}`} />
-            <span><span className="hidden sm:inline">LIVE </span>MIXES</span>
-          </button>
+        {/* RIGHT: Square Dark-Purple Social Buttons + Admin Login */}
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="hidden sm:flex items-center gap-1.5">
+            {socialLinks?.instagram && (
+              <a
+                href={socialLinks.instagram}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="DJ EMMA PRO Instagram"
+                className="w-9 h-9 bg-[#1b0833] hover:bg-[#ec1d64] text-white/90 hover:text-white flex items-center justify-center transition-colors border border-white/10"
+              >
+                <Instagram className="w-4 h-4" />
+              </a>
+            )}
+            {socialLinks?.facebook && (
+              <a
+                href={socialLinks.facebook}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="DJ EMMA PRO Facebook"
+                className="w-9 h-9 bg-[#1b0833] hover:bg-[#ec1d64] text-white/90 hover:text-white flex items-center justify-center transition-colors border border-white/10"
+              >
+                <Facebook className="w-4 h-4" />
+              </a>
+            )}
+            {socialLinks?.youtube && (
+              <a
+                href={socialLinks.youtube}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="DJ EMMA PRO YouTube"
+                className="w-9 h-9 bg-[#1b0833] hover:bg-[#ec1d64] text-white/90 hover:text-white flex items-center justify-center transition-colors border border-white/10"
+              >
+                <Youtube className="w-4 h-4" />
+              </a>
+            )}
+          </div>
 
-          {/* 3. NONSTOPS BUTTON */}
-          <button
-            onClick={() => handleNavClick('nonstops')}
-            className={`cursor-pointer px-1.5 xs:px-2.5 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-[10px] xs:text-[11px] sm:text-xs font-bold tracking-wider flex items-center gap-1 sm:gap-1.5 transition-all duration-300 whitespace-nowrap shrink-0 ${
-              activeTab === 'nonstops'
-                ? 'royal-nav-active font-black'
-                : 'text-slate-200 hover:text-amber-300 hover:bg-amber-400/10 active:bg-amber-400/20 border border-transparent'
-            }`}
-            title="NONSTOPS"
-          >
-            <Music className={`w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 shrink-0 ${activeTab === 'nonstops' ? 'text-amber-300' : 'text-amber-400'}`} />
-            <span>NONSTOPS</span>
-          </button>
-
-          {/* 4. ABOUT ME BUTTON */}
-          <button
-            onClick={() => handleNavClick('about-me')}
-            className={`cursor-pointer px-1.5 xs:px-2.5 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-[10px] xs:text-[11px] sm:text-xs font-bold tracking-wider flex items-center gap-1 sm:gap-1.5 transition-all duration-300 whitespace-nowrap shrink-0 ${
-              activeTab === 'about-me'
-                ? 'royal-nav-active font-black'
-                : 'text-slate-200 hover:text-amber-300 hover:bg-amber-400/10 active:bg-amber-400/20 border border-transparent'
-            }`}
-            title="ABOUT ME"
-          >
-            <User className={`w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 shrink-0 ${activeTab === 'about-me' ? 'text-amber-300' : 'text-amber-400'}`} />
-            <span><span className="hidden sm:inline">ABOUT </span>ME</span>
-          </button>
-
-          {/* Subtle Golden Divider */}
-          <div className="h-4 w-px bg-amber-400/30 hidden md:block shrink-0" />
-
-          {/* 5. ADMIN / DJ ACCESS BUTTON */}
           <button
             onClick={onOpenAdmin}
-            className={`cursor-pointer px-1.5 xs:px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-full text-[10px] xs:text-[11px] sm:text-xs font-bold tracking-wider flex items-center gap-1 transition-all duration-300 whitespace-nowrap shrink-0 ${
+            className={`cursor-pointer h-9 px-3 font-rainflow-condensed text-xs font-bold uppercase tracking-[0.14em] flex items-center gap-1.5 transition whitespace-nowrap shrink-0 border ${
               activeTab === 'admin'
-                ? 'royal-nav-active font-black'
-                : 'text-amber-400 hover:text-yellow-200 hover:bg-amber-500/20 active:bg-amber-500/30 border border-amber-400/50 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
+                ? 'bg-[#ec1d64] text-white border-[#ff4f8d]'
+                : 'bg-[#1b0833] hover:bg-[#ec1d64] text-pink-200 hover:text-white border-[#ec1d64]/45'
             }`}
             title={isAdmin ? 'Admin Dashboard (Active)' : 'Admin Login'}
           >
-            <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
-            <span className="hidden md:inline">{isAdmin ? 'ADMIN' : 'LOGIN'}</span>
+            <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden xs:inline">{isAdmin ? 'ADMIN' : 'LOGIN'}</span>
           </button>
-        </nav>
 
+          {/* Mobile Drawer Trigger */}
+          <button
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            className="lg:hidden cursor-pointer w-9 h-9 bg-[#1b0833] border border-[#ec1d64]/45 text-white flex items-center justify-center"
+            aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile Navigation Drawer */}
+      {mobileMenuOpen && (
+        <nav
+          className="lg:hidden bg-[#120426] border-t border-[#ec1d64]/30 px-4 py-4 flex flex-col gap-1"
+          aria-label="Mobile Navigation"
+        >
+          {NAV_ITEMS.map((item) => {
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.id)}
+                className={`cursor-pointer w-full text-left px-3 py-2.5 font-rainflow-condensed text-sm uppercase tracking-[0.16em] transition ${
+                  isActive
+                    ? 'bg-[#ec1d64] text-white font-bold'
+                    : 'text-purple-100 hover:bg-white/5 hover:text-pink-300'
+                }`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </nav>
+      )}
     </header>
   );
 };

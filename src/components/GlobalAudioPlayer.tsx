@@ -44,13 +44,13 @@ export const GlobalAudioPlayer: React.FC = () => {
 
   return (
     <aside 
-      className="fixed bottom-0 left-0 right-0 z-50 bg-[#12141a]/95 backdrop-blur-xl border-t border-white/20 shadow-[0_-8px_32px_rgba(0,0,0,0.9)] select-none animate-in slide-in-from-bottom-2 duration-200"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-[#08080b]/95 backdrop-blur-xl border-t border-amber-500/25 shadow-[0_-8px_32px_rgba(0,0,0,0.92)] select-none animate-in slide-in-from-bottom-2 duration-200"
       aria-label="DJ EMMA PRO Floating Audio Player"
     >
       {/* Top Slim Scrub / Progress Bar */}
       <div className="relative w-full h-1 sm:h-1.5 bg-white/10 hover:h-2 transition-all cursor-pointer overflow-hidden group">
         <div
-          className="absolute top-0 left-0 h-full bg-gradient-to-r from-sky-400 via-blue-400 to-amber-400 shadow-[0_0_12px_rgba(56,189,248,0.85)]"
+          className="absolute top-0 left-0 h-full bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 shadow-[0_0_12px_rgba(212,175,55,0.8)]"
           style={{ width: `${progressPercent}%` }}
         />
         <input
@@ -69,7 +69,7 @@ export const GlobalAudioPlayer: React.FC = () => {
         
         {/* LEFT: Compact Song Cover & Title */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial max-w-[45%] sm:max-w-xs md:max-w-sm">
-          <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-lg overflow-hidden shrink-0 border border-white/30 shadow-md bg-slate-900">
+          <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-sm overflow-hidden shrink-0 border border-amber-400/40 shadow-md bg-[#050507]">
             <img
               src={currentTrack.coverUrl}
               alt={currentTrack.title}
@@ -78,9 +78,9 @@ export const GlobalAudioPlayer: React.FC = () => {
             {isPlaying && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                 <div className="flex items-end gap-0.5 h-3.5">
-                  <span className="w-0.5 sm:w-1 bg-sky-400 eq-bar-1 h-3.5" />
-                  <span className="w-0.5 sm:w-1 bg-amber-400 eq-bar-2 h-3.5" />
-                  <span className="w-0.5 sm:w-1 bg-sky-300 eq-bar-3 h-3.5" />
+                  <span className="w-0.5 sm:w-1 bg-amber-300 eq-bar-1 h-3.5" />
+                  <span className="w-0.5 sm:w-1 bg-yellow-400 eq-bar-2 h-3.5" />
+                  <span className="w-0.5 sm:w-1 bg-amber-300 eq-bar-3 h-3.5" />
                 </div>
               </div>
             )}
@@ -88,20 +88,20 @@ export const GlobalAudioPlayer: React.FC = () => {
 
           <div className="min-w-0 leading-tight">
             <div className="flex items-center gap-1.5">
-              <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+              <span className="inline-flex items-center px-1.5 py-0.2 rounded-sm text-[9px] font-bold uppercase tracking-wider bg-amber-400/15 text-amber-300 border border-amber-400/30">
                 {currentTrack.type === 'live' ? (
                   <>
-                    <Radio className="w-2.5 h-2.5 mr-1 text-red-400 animate-pulse" />
+                    <Radio className="w-2.5 h-2.5 mr-1 text-amber-400 animate-pulse" />
                     LIVE
                   </>
                 ) : (
                   <>
-                    <Music2 className="w-2.5 h-2.5 mr-1 text-purple-300" />
+                    <Music2 className="w-2.5 h-2.5 mr-1 text-amber-300" />
                     NONSTOP
                   </>
                 )}
               </span>
-              <span className="text-[10px] text-slate-400 font-mono hidden md:inline truncate">
+              <span className="text-[10px] text-neutral-400 font-mono hidden md:inline truncate">
                 {currentTrack.genre}
               </span>
             </div>
@@ -127,8 +127,8 @@ export const GlobalAudioPlayer: React.FC = () => {
             onClick={togglePlay}
             title={isPlaying ? 'Pause' : 'Play'}
             aria-label={isPlaying ? 'Pause playback' : 'Start playback'}
-            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-b from-amber-300 to-yellow-500 text-slate-950 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition border cursor-pointer ${
-              isPlaying ? 'border-sky-300 ring-2 ring-sky-400/50' : 'border-white/60'
+            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-b from-amber-300 to-yellow-500 text-black flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition border cursor-pointer ${
+              isPlaying ? 'border-amber-200 ring-2 ring-amber-400/45' : 'border-amber-200/60'
             }`}
           >
             {isPlaying ? (
@@ -179,7 +179,7 @@ export const GlobalAudioPlayer: React.FC = () => {
               value={isMuted ? 0 : volume}
               onChange={(e) => setVolume(parseFloat(e.target.value))}
               aria-label="Volume slider"
-              className="w-16 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+              className="w-16 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400"
             />
           </div>
 

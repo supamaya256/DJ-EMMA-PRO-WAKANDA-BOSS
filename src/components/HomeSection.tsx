@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Radio,
   Music,
+  Disc3,
   Heart,
   ChevronRight,
-  ChevronLeft,
   Newspaper,
   Share2,
   Calendar,
@@ -13,12 +13,16 @@ import {
   X,
   ArrowRight,
   Zap,
+  Play,
+  Pause,
+  Download,
 } from 'lucide-react';
 import { LiveMix, NonstopMix, NewsPost, ArtistInfo, ActiveTab } from '../types';
 import { isItemLikedByVisitor } from '../lib/visitor';
 import { AdSenseBannerSlot } from './AdSenseBannerSlot';
 import { ScrollReveal } from './ScrollReveal';
-import { NonstopsCarousel3D } from './NonstopsCarousel3D';
+import { MixCardRainflow } from './MixCardRainflow';
+import { useAudio } from '../context/AudioContext';
 
 interface HomeSectionProps {
   liveMixes: LiveMix[];
@@ -45,32 +49,19 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
   commentCounts = {},
   isLoadingContent = false,
 }) => {
+  const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
   const [copiedPostId, setCopiedPostId] = useState<string | null>(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [spotlightIndex, setSpotlightIndex] = useState<number>(0);
-  const [isSpotlightPaused, setIsSpotlightPaused] = useState<boolean>(false);
+  const [selectedArticle, setSelectedArticle] = useState<NewsPost | null>(null);
 
   const publishedNews = newsPosts.filter((p) => p.isPublished);
   const publishedLive = liveMixes.filter((m) => m.isPublished);
   const publishedNonstops = nonstops.filter((n) => n.isPublished);
 
-  // Keep spotlightIndex in range when new articles are published or updated
-  useEffect(() => {
-    if (publishedNews.length === 0) {
-      setSpotlightIndex(0);
-    } else if (spotlightIndex >= publishedNews.length) {
-      setSpotlightIndex(0);
-    }
-  }, [publishedNews.length, spotlightIndex]);
-
-  // Automatic spotlight rotation across published news articles
-  useEffect(() => {
-    if (publishedNews.length <= 1 || isSpotlightPaused) return;
-    const timer = window.setInterval(() => {
-      setSpotlightIndex((prev) => (prev + 1) % publishedNews.length);
-    }, 7000);
-    return () => window.clearInterval(timer);
-  }, [publishedNews.length, isSpotlightPaused]);
+  // Latest Mixtapes combines newest published releases across Live Mixes and Nonstops
+  const latestMixtapes = [
+    ...publishedLive.map((m) => ({ ...m, releaseKind: 'live' as const })),
+    ...publishedNonstops.map((n) => ({ ...n, releaseKind: 'nonstop' as const })),
+  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const handleShareNews = (post: NewsPost) => {
     const url = window.location.origin + '?news=' + post.id;
@@ -83,15 +74,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
     } else {
       navigator.clipboard?.writeText(url);
       setCopiedPostId(post.id);
-      setTimeout(() => setCopiedPostId(null), 2500);
-    }
-  };
-
-  const handleTickerClick = (_post: NewsPost, idx: number) => {
-    setSpotlightIndex(idx);
-    const boxEl = document.getElementById('news-spotlight-box');
-    if (boxEl) {
-      boxEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      window.setTimeout(() => setCopiedPostId(null), 2400);
     }
   };
 
@@ -107,291 +90,380 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
     }
   };
 
-  const safeSpotlightIndex = publishedNews.length > 0 ? spotlightIndex % publishedNews.length : 0;
-  const featuredPost = publishedNews[safeSpotlightIndex];
-
   return (
-    <div className="w-full text-white pb-24 pt-2 sm:pt-4 space-y-12">
+    <div className="w-full text-white pb-20 space-y-20 sm:space-y-24">
 
-      {/* ---------------------------------------------------- */}
-      {/* SECTION 1: OFFICIAL NEWS & UPDATES + LIVE TICKER     */}
-      {/* ---------------------------------------------------- */}
-      <section className="max-w-7xl mx-auto px-4 lg:px-8 space-y-5">
+      {/* ==================================================================== */}
+      {/* VISUAL SECTION ONE: LARGE DJ EMMA PRO WAKANDA STAGE PRESENTATION     */}
+      {/* ==================================================================== */}
+      <section className="relative w-full py-14 sm:py-20 bg-[#120526] border-b border-[#ec1d64]/20 overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="absolute -left-24 top-1/2 -translate-y-1/2 w-[460px] h-[460px] rounded-full blur-[120px] opacity-30 pointer-events-none"
+          style={{ background: 'radial-gradient(circle, #ec1d64 0%, transparent 70%)' }}
+        />
 
-        {/* Blue and Gold Metallic Header Bar */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          {/* Large Prominent Portrait with Neon Magenta Architectural Frame */}
+          <ScrollReveal className="lg:col-span-6">
+            <div className="relative p-3 sm:p-4">
+              <div
+                aria-hidden="true"
+                className="absolute inset-4 -translate-x-3 translate-y-3 border-[5px] border-[#ec1d64] pointer-events-none"
+              />
+              <div className="relative z-10 overflow-hidden bg-[#0e041f] border border-white/15 shadow-[0_24px_60px_rgba(4,1,14,0.9)]">
+                <img
+                  src="/assets/aistudio/1000355629_1467eab5.png"
+                  alt="DJ EMMA PRO - The Wakanda Boss"
+                  className="w-full h-auto max-h-[540px] object-cover object-top block"
+                />
+              </div>
+            </div>
+          </ScrollReveal>
+
+          {/* Editorial Presentation Copy */}
+          <ScrollReveal delayMs={100} className="lg:col-span-6 space-y-5">
+            <span className="inline-block text-xs font-rainflow-condensed font-bold uppercase tracking-[0.26em] text-[#ec1d64]">
+              01 · THE WAKANDA BOSS EXPERIENCE
+            </span>
+            <h2 className="font-display font-black text-3xl sm:text-5xl text-white leading-[1.02] uppercase">
+              Signature Club Energy & Unstoppable Vibes
+            </h2>
+            <p className="text-sm sm:text-base text-purple-100/85 leading-relaxed">
+              Known across the entertainment scene as <strong className="text-white">THE WAKANDA BOSS</strong>, DJ EMMA PRO delivers crowd-commanding club sets, precision transitions, and studio-mastered party sessions that unite Afrobeats, Dancehall, Amapiano, and Ugandan anthems.
+            </p>
+            <div className="pt-2 flex flex-wrap gap-3">
+              <button
+                onClick={() => onNavigate('live-mixes')}
+                className="cursor-pointer gold-btn px-7 py-3.5 font-rainflow-condensed text-xs sm:text-sm font-bold uppercase tracking-[0.18em] inline-flex items-center gap-2"
+              >
+                <span>STREAM LIVE MIXES</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => onNavigate('gallery')}
+                className="cursor-pointer rainflow-btn-primary px-6 py-3.5 font-rainflow-condensed text-xs sm:text-sm font-bold uppercase tracking-[0.18em]"
+              >
+                VIEW GALLERY
+              </button>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ==================================================================== */}
+      {/* VISUAL SECTION TWO: LARGE REVERSE BIOGRAPHY & ROOTS PRESENTATION     */}
+      {/* ==================================================================== */}
+      <section className="relative w-full py-12 sm:py-18 bg-[#0e041f] overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[130px] opacity-25 pointer-events-none"
+          style={{ background: 'radial-gradient(circle, #7c3aed 0%, transparent 70%)' }}
+        />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          {/* Left Narrative */}
+          <ScrollReveal className="lg:col-span-6 space-y-5 order-2 lg:order-1">
+            <span className="inline-block text-xs font-rainflow-condensed font-bold uppercase tracking-[0.26em] text-[#ec1d64]">
+              02 · SERERE TO KAMPALA, UGANDA
+            </span>
+            <h2 className="font-display font-black text-3xl sm:text-5xl text-white leading-[1.02] uppercase">
+              Music Mixing, Branding & Creative Craft
+            </h2>
+            <p className="text-sm sm:text-base text-purple-100/85 leading-relaxed">
+              {artist.bio}
+            </p>
+            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-white/10">
+              <div>
+                <span className="text-[11px] font-rainflow-condensed uppercase tracking-widest text-pink-300 block">
+                  ORIGIN
+                </span>
+                <span className="text-sm font-bold text-white">{artist.origin}</span>
+              </div>
+              <div>
+                <span className="text-[11px] font-rainflow-condensed uppercase tracking-widest text-pink-300 block">
+                  BASE LOCATION
+                </span>
+                <span className="text-sm font-bold text-white">{artist.baseLocation}</span>
+              </div>
+            </div>
+            <div className="pt-2">
+              <button
+                onClick={() => onNavigate('about-me')}
+                className="cursor-pointer rainflow-btn-primary px-7 py-3.5 font-rainflow-condensed text-xs sm:text-sm font-bold uppercase tracking-[0.18em] inline-flex items-center gap-2"
+              >
+                <span>READ FULL BIOGRAPHY</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </ScrollReveal>
+
+          {/* Right Large Visual Photo */}
+          <ScrollReveal delayMs={100} className="lg:col-span-6 order-1 lg:order-2">
+            <div className="relative p-3 sm:p-4">
+              <div
+                aria-hidden="true"
+                className="absolute inset-4 translate-x-3 translate-y-3 border-[5px] border-[#ec1d64] pointer-events-none"
+              />
+              <div className="relative z-10 overflow-hidden bg-[#16072b] border border-white/15 shadow-[0_24px_60px_rgba(4,1,14,0.92)]">
+                <img
+                  src="/assets/aistudio/download_036376fa.jpg"
+                  alt="DJ EMMA PRO Creative Portrait"
+                  className="w-full h-auto max-h-[540px] object-cover object-top block"
+                />
+              </div>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ==================================================================== */}
+      {/* VISUAL SECTION THREE: FULL-WIDTH STAGE VISUAL & CREATIVE EMPIRE      */}
+      {/* ==================================================================== */}
+      <section className="relative w-full min-h-[460px] sm:min-h-[520px] flex items-center overflow-hidden border-y border-[#ec1d64]/40 bg-[#14052b]">
+        {/* Full-Width Preserved DJ EMMA PRO Artwork Backdrop */}
+        <img
+          src="/assets/aistudio/WhatsApp_Image_2026-11-12_at_9.07.01_AM_d9477edb.jpeg"
+          alt="DJ EMMA PRO Official Stage Visual"
+          className="absolute inset-0 w-full h-full object-cover object-center opacity-45"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-gradient-to-r from-[#0e041f]/95 via-[#17062e]/85 to-[#0e041f]/75"
+        />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-14 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-8 space-y-5">
+            <span className="inline-block text-xs font-rainflow-condensed font-bold uppercase tracking-[0.26em] text-[#ec1d64]">
+              03 · FULL-SCALE ENTERTAINMENT & DROPS
+            </span>
+            <h2 className="font-display font-black text-3xl sm:text-5xl lg:text-6xl text-white uppercase leading-[0.98]">
+              DJ Drops, Marathon Nonstops & Event Bookings
+            </h2>
+            <p className="text-sm sm:text-base text-purple-100/85 max-w-2xl leading-relaxed">
+              From electrifying club performances and continuous marathon nonstop party sessions to custom studio DJ drops and graphic branding artwork tailored for artists, events, and brands across East Africa.
+            </p>
+            <div className="pt-2 flex flex-wrap gap-3">
+              <button
+                onClick={() => onNavigate('nonstops')}
+                className="cursor-pointer gold-btn px-7 py-3.5 font-rainflow-condensed text-xs sm:text-sm font-bold uppercase tracking-[0.18em]"
+              >
+                EXPLORE NONSTOP MIXES
+              </button>
+              <button
+                onClick={() => onNavigate('contact')}
+                className="cursor-pointer rainflow-btn-primary px-7 py-3.5 font-rainflow-condensed text-xs sm:text-sm font-bold uppercase tracking-[0.18em]"
+              >
+                CONTACT FOR BOOKING
+              </button>
+            </div>
+          </div>
+
+          <div className="lg:col-span-4 flex justify-center lg:justify-end">
+            <div className="w-48 h-48 sm:w-60 sm:h-60 p-3 bg-[#0e041f]/80 border-2 border-[#ec1d64]/65 shadow-[0_0_40px_rgba(236,29,100,0.35)]">
+              <img
+                src="/assets/aistudio/Glossy_DJ_Emma_Pro_Emblem__1__be0e7f62.png"
+                alt="DJ EMMA PRO Official Emblem"
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <AdSenseBannerSlot slotName="DJ EMMA PRO · Official Partner Network" />
+
+      {/* ==================================================================== */}
+      {/* SECTION 4: LATEST NEWS                                               */}
+      {/* ==================================================================== */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 space-y-8">
         <ScrollReveal>
-          <div className="electric-gold-shimmer rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 bg-gradient-to-r from-[#091538] via-[#0e235c] to-[#091538] border-2 border-amber-400/80 electric-blue-glow flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
-              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-amber-300 via-yellow-400 to-sky-400 flex items-center justify-center text-slate-950 font-black shadow-md shrink-0">
-                <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <div className="min-w-0">
-                <h2 className="text-sm sm:text-lg md:text-xl font-black text-white uppercase tracking-wider font-display truncate">
-                  OFFICIAL NEWS & UPDATES
-                </h2>
-                <p className="text-[10px] sm:text-xs text-sky-200/90 truncate">
-                  Official announcements, event dates, and personal messages from DJ EMMA PRO
-                </p>
-              </div>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#ec1d64]/35 pb-4">
+            <div className="space-y-1">
+              <span className="text-xs font-rainflow-condensed font-bold uppercase tracking-[0.24em] text-[#ec1d64]">
+                OFFICIAL ANNOUNCEMENTS & TOUR DISPATCH
+              </span>
+              <h2 className="font-display font-black text-3xl sm:text-4xl text-white uppercase tracking-tight">
+                LATEST NEWS
+              </h2>
             </div>
 
             <button
-              onClick={() => {
-                if (publishedNews.length > 1) {
-                  setSpotlightIndex((prev) => (prev + 1) % publishedNews.length);
-                }
-                const boxEl = document.getElementById('news-spotlight-box');
-                if (boxEl) boxEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }}
-              className="cursor-pointer px-3 sm:px-5 py-1.5 sm:py-2 rounded-full gold-btn text-[11px] sm:text-xs font-black uppercase tracking-wider shrink-0 flex items-center gap-1.5 shadow-lg hover:scale-105 active:scale-95 transition"
+              onClick={() => onNavigate('news')}
+              className="cursor-pointer self-start sm:self-auto inline-flex items-center gap-1.5 font-rainflow-condensed text-xs font-bold uppercase tracking-[0.18em] text-[#ff4f8d] hover:text-white transition"
             >
-              <span>All News ({publishedNews.length})</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>VIEW ALL NEWS ({publishedNews.length})</span>
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </ScrollReveal>
 
-        {/* Moving Latest-News Ticker fed automatically by published articles */}
+        {/* Moving Breaking News Ticker */}
         {publishedNews.length > 0 && (
           <div
-            className="news-ticker-wrapper relative rounded-xl bg-gradient-to-r from-[#050c22] via-[#0b1b47] to-[#050c22] border border-sky-400/40 shadow-[0_0_20px_rgba(56,189,248,0.18)] overflow-hidden flex items-center"
+            className="news-ticker-wrapper relative bg-[#16072b] border border-[#ec1d64]/40 overflow-hidden flex items-center"
             aria-label="Latest news ticker"
           >
-            <div className="relative z-10 px-3 sm:px-4 py-2 bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500 text-white font-black text-[10px] sm:text-xs uppercase tracking-widest flex items-center gap-1.5 shrink-0 border-r border-amber-300/60 shadow-md">
-              <Zap className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+            <div className="relative z-10 px-4 py-2 bg-[#ec1d64] text-white font-rainflow-condensed font-bold text-xs uppercase tracking-[0.18em] flex items-center gap-1.5 shrink-0">
+              <Zap className="w-3.5 h-3.5" />
               <span>LATEST NEWS</span>
             </div>
 
             <div className="flex-1 overflow-hidden py-2">
               <div className="news-ticker-track">
-                {[...publishedNews, ...publishedNews].map((item, idx) => {
-                  const realIdx = idx % publishedNews.length;
-                  return (
-                    <button
-                      key={`${item.id}-${idx}`}
-                      onClick={() => handleTickerClick(item, realIdx)}
-                      className="cursor-pointer inline-flex items-center gap-2.5 px-5 text-xs sm:text-sm text-slate-100 hover:text-amber-300 transition whitespace-nowrap"
-                    >
-                      <span className="text-[10px] font-mono text-sky-300 font-bold">
-                        {formatDate(item.createdAt)}
-                      </span>
-                      <span className="font-bold text-amber-300">{item.title}</span>
-                      <span className="text-slate-300 max-w-xs truncate hidden sm:inline">
-                        — {item.content}
-                      </span>
-                      <span className="text-sky-400 font-black pl-2" aria-hidden="true">◆</span>
-                    </button>
-                  );
-                })}
+                {[...publishedNews, ...publishedNews].map((item, idx) => (
+                  <button
+                    key={`${item.id}-${idx}`}
+                    onClick={() => setSelectedArticle(item)}
+                    className="cursor-pointer inline-flex items-center gap-2.5 px-5 text-xs sm:text-sm text-purple-100 hover:text-pink-300 transition whitespace-nowrap"
+                  >
+                    <span className="text-[11px] font-mono text-pink-300 font-bold">
+                      {formatDate(item.createdAt)}
+                    </span>
+                    <span className="font-bold text-white">{item.title}</span>
+                    <span className="text-purple-200/70 max-w-xs truncate hidden sm:inline">
+                      — {item.content}
+                    </span>
+                    <span className="text-[#ec1d64] pl-2" aria-hidden="true">◆</span>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
         )}
 
-        {/* Loading state while first batch fetches */}
         {isLoadingContent && publishedNews.length === 0 ? (
-          <div className="rounded-2xl sm:rounded-3xl p-6 bg-gradient-to-r from-[#070e24] via-[#0d1c44] to-[#070e24] border border-sky-400/30 animate-pulse flex flex-col md:flex-row gap-6">
-            <div className="w-full md:w-64 aspect-[4/3] rounded-2xl bg-white/5" />
-            <div className="flex-1 space-y-3 py-2">
-              <div className="h-4 w-36 bg-white/10 rounded" />
-              <div className="h-7 w-2/3 bg-white/10 rounded" />
-              <div className="h-20 w-full bg-white/5 rounded" />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[0, 1, 2].map((sk) => (
+              <div key={sk} className="h-80 bg-[#16072b] border border-white/10 animate-pulse" />
+            ))}
           </div>
         ) : publishedNews.length === 0 ? (
-          <div className="rounded-2xl royal-glass-card p-8 text-center space-y-2">
-            <Newspaper className="w-10 h-10 text-amber-400/40 mx-auto" />
-            <h3 className="text-base font-bold text-white font-display">No News Updates Published Yet</h3>
-            <p className="text-xs text-slate-400 max-w-md mx-auto">
+          <div className="bg-[#16072b] border border-white/10 p-10 text-center space-y-2">
+            <Newspaper className="w-10 h-10 text-[#ec1d64]/60 mx-auto" />
+            <h3 className="text-base font-bold text-white">No News Updates Published Yet</h3>
+            <p className="text-xs text-purple-200/70 max-w-md mx-auto">
               New announcements from DJ EMMA PRO will appear here automatically once published.
             </p>
           </div>
         ) : (
-          <>
-            {/* AUTOMATICALLY TRANSITIONING FEATURED SPOTLIGHT ARTICLE */}
-            {featuredPost && (
-              <div
-                id="news-spotlight-box"
-                onMouseEnter={() => setIsSpotlightPaused(true)}
-                onMouseLeave={() => setIsSpotlightPaused(false)}
-                onFocusCapture={() => setIsSpotlightPaused(true)}
-                onBlurCapture={() => setIsSpotlightPaused(false)}
-                className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-r from-[#070e24] via-[#0d1c44] to-[#070e24] border-2 border-amber-400/80 shadow-[0_0_32px_rgba(56,189,248,0.22),0_0_24px_rgba(245,158,11,0.22)] overflow-hidden transition-all duration-300"
-              >
-                {/* Automatic transition timer progress bar */}
-                {publishedNews.length > 1 && !isSpotlightPaused && (
-                  <div className="w-full h-1 bg-white/10 overflow-hidden">
-                    <div
-                      key={featuredPost.id}
-                      className="h-full bg-gradient-to-r from-sky-400 via-amber-300 to-yellow-500 spotlight-progress-bar"
-                    />
-                  </div>
-                )}
-
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {publishedNews.map((post) => {
+              const isLiked = isItemLikedByVisitor('dj_emma_liked_news', post.id);
+              return (
                 <article
-                  key={featuredPost.id}
-                  className="animate-spotlight-in p-4 sm:p-6 flex flex-col md:flex-row items-center md:items-start gap-4 sm:gap-6 group"
+                  key={post.id}
+                  className="group bg-[#16072b] border border-[#ec1d64]/25 hover:border-[#ec1d64] transition flex flex-col justify-between overflow-hidden shadow-xl"
                 >
-                  {/* Thumbnail with Electric-Blue & Gold Rim */}
-                  {featuredPost.imageUrl && (
+                  <div>
                     <div
-                      onClick={() => setPreviewImage(featuredPost.imageUrl || null)}
-                      className="relative w-full md:w-60 lg:w-72 aspect-[4/3] rounded-2xl overflow-hidden bg-[#040816] border border-sky-400/50 shadow-xl shrink-0 cursor-pointer group-hover:border-amber-400/80 group-hover:shadow-[0_0_24px_rgba(56,189,248,0.35)] transition"
+                      onClick={() => setSelectedArticle(post)}
+                      className="relative aspect-[16/10] w-full overflow-hidden bg-[#0e041f] cursor-pointer"
                     >
-                      <img
-                        src={featuredPost.imageUrl}
-                        alt={featuredPost.title}
-                        className="w-full h-full object-cover img-smooth-zoom"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent pointer-events-none" />
-                      <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded text-[10px] font-bold bg-black/80 text-amber-300 border border-amber-400/30 flex items-center gap-1">
-                        <ImageIcon className="w-3 h-3" />
-                        <span>View Full</span>
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Spotlight Article Content */}
-                  <div className="flex-1 space-y-3 text-left w-full">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 text-[11px] sm:text-xs text-amber-300 font-bold">
-                        <Calendar className="w-3.5 h-3.5 text-sky-400" />
-                        <span>{formatDate(featuredPost.createdAt)}</span>
-                        <span className="text-sky-400">•</span>
-                        <span className="text-white">THE WAKANDA BOSS</span>
-                      </div>
-
-                      {publishedNews.length > 1 && (
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            onClick={() =>
-                              setSpotlightIndex((prev) => (prev - 1 + publishedNews.length) % publishedNews.length)
-                            }
-                            aria-label="Previous news article"
-                            className="cursor-pointer w-7 h-7 rounded-lg bg-white/5 hover:bg-sky-500/20 text-sky-300 border border-sky-400/30 flex items-center justify-center transition"
-                          >
-                            <ChevronLeft className="w-4 h-4" />
-                          </button>
-                          <span className="text-[11px] font-mono text-sky-200 px-1.5">
-                            {safeSpotlightIndex + 1} / {publishedNews.length}
-                          </span>
-                          <button
-                            onClick={() =>
-                              setSpotlightIndex((prev) => (prev + 1) % publishedNews.length)
-                            }
-                            aria-label="Next news article"
-                            className="cursor-pointer w-7 h-7 rounded-lg bg-white/5 hover:bg-sky-500/20 text-sky-300 border border-sky-400/30 flex items-center justify-center transition"
-                          >
-                            <ChevronRight className="w-4 h-4" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    <h3 className="text-xl sm:text-2xl font-black text-white gold-chrome-text font-display leading-tight">
-                      {featuredPost.title}
-                    </h3>
-
-                    <p className="text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-line">
-                      {featuredPost.content}
-                    </p>
-
-                    {/* Spotlight Dots + Action Row */}
-                    <div className="pt-3 flex flex-wrap items-center justify-between gap-3 border-t border-amber-400/20">
-                      {publishedNews.length > 1 ? (
-                        <div className="flex items-center gap-1.5" role="tablist" aria-label="News spotlight selector">
-                          {publishedNews.map((p, idx) => (
-                            <button
-                              key={p.id}
-                              onClick={() => setSpotlightIndex(idx)}
-                              aria-label={`View spotlight ${p.title}`}
-                              className={`cursor-pointer h-2 rounded-full transition-all ${
-                                idx === safeSpotlightIndex
-                                  ? 'w-7 bg-gradient-to-r from-sky-400 to-amber-400 shadow-[0_0_10px_rgba(56,189,248,0.6)]'
-                                  : 'w-2 bg-white/25 hover:bg-sky-300/60'
-                              }`}
-                            />
-                          ))}
-                        </div>
+                      {post.imageUrl ? (
+                        <img
+                          src={post.imageUrl}
+                          alt={post.title}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover img-smooth-zoom"
+                        />
                       ) : (
-                        <div />
+                        <div className="w-full h-full bg-gradient-to-br from-[#2d0c54] to-[#0e041f] flex items-center justify-center">
+                          <ImageIcon className="w-10 h-10 text-[#ec1d64]/50" />
+                        </div>
                       )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#16072b] via-transparent to-transparent pointer-events-none" />
+                    </div>
 
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => onLikeNews(featuredPost.id)}
-                          className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition active:scale-95 text-xs ${
-                            isItemLikedByVisitor('dj_emma_liked_news', featuredPost.id)
-                              ? 'bg-rose-500/25 text-rose-300 border-rose-400/50'
-                              : 'bg-white/5 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border-white/10'
-                          }`}
-                        >
-                          <Heart className={`w-3.5 h-3.5 ${isItemLikedByVisitor('dj_emma_liked_news', featuredPost.id) ? 'fill-rose-500 text-rose-400' : 'fill-rose-500/30 text-rose-400'}`} />
-                          <span className="font-bold text-white">{featuredPost.likesCount}</span>
-                        </button>
-
-                        <button
-                          onClick={() => onOpenComments?.(featuredPost.id, 'news', featuredPost.title)}
-                          className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-sky-500/20 text-slate-300 hover:text-white border border-sky-400/25 transition text-xs"
-                        >
-                          <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
-                          <span>Comments {commentCounts[featuredPost.id] ? `(${commentCounts[featuredPost.id]})` : ''}</span>
-                        </button>
-
-                        <button
-                          onClick={() => handleShareNews(featuredPost)}
-                          className="cursor-pointer flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition text-xs"
-                        >
-                          {copiedPostId === featuredPost.id ? (
-                            <span className="text-emerald-300 text-[11px] font-bold">Copied!</span>
-                          ) : (
-                            <>
-                              <Share2 className="w-3.5 h-3.5" />
-                              <span className="hidden sm:inline">Share</span>
-                            </>
-                          )}
-                        </button>
+                    <div className="p-6 space-y-2.5">
+                      <div className="flex items-center gap-2 text-xs text-pink-300 font-semibold">
+                        <Calendar className="w-3.5 h-3.5 text-[#ec1d64]" />
+                        <span>{formatDate(post.createdAt)}</span>
+                        <span aria-hidden="true">·</span>
+                        <span className="text-purple-200/75">THE WAKANDA BOSS</span>
                       </div>
+
+                      <h3
+                        onClick={() => setSelectedArticle(post)}
+                        className="font-bold text-lg sm:text-xl text-white group-hover:text-pink-300 transition leading-snug cursor-pointer"
+                      >
+                        {post.title}
+                      </h3>
+
+                      <p className="text-xs sm:text-sm text-purple-100/80 leading-relaxed line-clamp-3">
+                        {post.content}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="px-6 pb-5 pt-3 border-t border-white/10 flex items-center justify-between gap-2 text-xs">
+                    <button
+                      onClick={() => setSelectedArticle(post)}
+                      className="cursor-pointer inline-flex items-center gap-1.5 font-rainflow-condensed font-bold uppercase tracking-[0.16em] text-[#ff4f8d] hover:text-white transition"
+                    >
+                      <span>READ MORE</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => onLikeNews(post.id)}
+                        className={`cursor-pointer flex items-center gap-1 transition ${
+                          isLiked ? 'text-[#ec1d64] font-bold' : 'text-purple-200 hover:text-pink-300'
+                        }`}
+                      >
+                        <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-[#ec1d64]' : ''}`} />
+                        <span className="tabular-nums">{post.likesCount}</span>
+                      </button>
+
+                      <button
+                        onClick={() => onOpenComments?.(post.id, 'news', post.title)}
+                        className="cursor-pointer flex items-center gap-1 text-purple-200 hover:text-pink-300 transition"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        <span>{commentCounts[post.id] || 0}</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleShareNews(post)}
+                        className="cursor-pointer text-purple-200 hover:text-pink-300 transition"
+                      >
+                        {copiedPostId === post.id ? (
+                          <span className="text-emerald-300 text-[11px] font-bold">Copied!</span>
+                        ) : (
+                          <Share2 className="w-3.5 h-3.5" />
+                        )}
+                      </button>
                     </div>
                   </div>
                 </article>
-              </div>
-            )}
-          </>
+              );
+            })}
+          </div>
         )}
       </section>
 
-      {/* ---------------------------------------------------- */}
-      {/* ADSENSE READY BANNER SLOT 1                          */}
-      {/* ---------------------------------------------------- */}
-      <AdSenseBannerSlot slotName="DJ EMMA PRO — Featured Entertainment Sponsor" />
-
-      {/* ---------------------------------------------------- */}
-      {/* SECTION 2: ALL PUBLISHED LIVE MIXES                   */}
-      {/* ---------------------------------------------------- */}
-      <section className="max-w-7xl mx-auto px-4 lg:px-8 space-y-6">
+      {/* ==================================================================== */}
+      {/* SECTION 5: LIVE MIXES                                                */}
+      {/* ==================================================================== */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 space-y-8">
         <ScrollReveal>
-          <div className="flex items-center justify-between pb-3 border-b border-amber-400/30">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 via-blue-700 to-amber-500 flex items-center justify-center text-white shadow-lg border border-sky-400/40">
-                <Radio className="w-5 h-5 text-amber-200" />
-              </div>
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black gold-chrome-text font-display uppercase tracking-wide">
-                  LATEST LIVE MIXES
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-300">
-                  Live sessions and party tapes mixed live by DJ EMMA PRO
-                </p>
-              </div>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#ec1d64]/35 pb-4">
+            <div className="space-y-1">
+              <span className="text-xs font-rainflow-condensed font-bold uppercase tracking-[0.24em] text-[#ec1d64]">
+                CLUB PERFORMANCES & RECORDED SESSIONS
+              </span>
+              <h2 className="font-display font-black text-3xl sm:text-4xl text-white uppercase tracking-tight">
+                LIVE MIXES
+              </h2>
             </div>
 
             <button
               onClick={() => onNavigate('live-mixes')}
-              className="cursor-pointer flex items-center gap-1 text-xs sm:text-sm text-amber-300 hover:text-sky-300 font-bold transition group"
+              className="cursor-pointer self-start sm:self-auto inline-flex items-center gap-1.5 font-rainflow-condensed text-xs font-bold uppercase tracking-[0.18em] text-[#ff4f8d] hover:text-white transition"
             >
-              <span>VIEW ALL ({publishedLive.length})</span>
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+              <span>ALL LIVE MIXES ({publishedLive.length})</span>
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </ScrollReveal>
@@ -399,56 +471,54 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
         {isLoadingContent && publishedLive.length === 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[0, 1, 2].map((sk) => (
-              <div key={sk} className="h-72 rounded-2xl royal-glass-card animate-pulse" />
+              <div key={sk} className="h-80 bg-[#16072b] border border-white/10 animate-pulse" />
             ))}
           </div>
         ) : publishedLive.length === 0 ? (
-          <div className="rounded-2xl royal-glass-card p-8 text-center space-y-2">
-            <Radio className="w-10 h-10 text-amber-400/40 mx-auto" />
-            <h3 className="text-base font-bold text-white font-display">No Live Mixes Published Yet</h3>
-            <p className="text-xs text-slate-400 max-w-md mx-auto">
-              Real uploads by DJ EMMA PRO will appear here immediately after uploading.
+          <div className="bg-[#16072b] border border-white/10 p-10 text-center space-y-2">
+            <Radio className="w-10 h-10 text-[#ec1d64]/60 mx-auto" />
+            <h3 className="text-base font-bold text-white">No Live Mixes Published Yet</h3>
+            <p className="text-xs text-purple-200/70 max-w-md mx-auto">
+              Real live club sets by DJ EMMA PRO will appear here immediately after uploading.
             </p>
           </div>
         ) : (
-          <NonstopsCarousel3D
-            trackType="live"
-            items={publishedLive}
-            onLikeItem={(id) => onLikeMix(id, 'live')}
-            onOpenComments={onOpenComments}
-            commentCounts={commentCounts}
-            showTracklistInFocus={false}
-            showShareInFocus={true}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {publishedLive.map((mix) => (
+              <MixCardRainflow
+                key={mix.id}
+                mix={mix}
+                trackType="live"
+                onLike={(id) => onLikeMix(id, 'live')}
+                onOpenComments={onOpenComments}
+                commentCount={commentCounts[mix.id] || 0}
+              />
+            ))}
+          </div>
         )}
       </section>
 
-      {/* ---------------------------------------------------- */}
-      {/* SECTION 3: ALL PUBLISHED FEATURED NONSTOPS            */}
-      {/* ---------------------------------------------------- */}
-      <section className="max-w-7xl mx-auto px-4 lg:px-8 space-y-6">
+      {/* ==================================================================== */}
+      {/* SECTION 6: NONSTOP MIXES                                             */}
+      {/* ==================================================================== */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 space-y-8">
         <ScrollReveal>
-          <div className="flex items-center justify-between pb-3 border-b border-amber-400/30">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 via-sky-500 to-amber-500 flex items-center justify-center text-white shadow-lg border border-sky-400/40">
-                <Music className="w-5 h-5 text-amber-200" />
-              </div>
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black gold-chrome-text font-display uppercase tracking-wide">
-                  FEATURED NONSTOPS
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-300">
-                  Continuous marathon party sessions with seamless transitions
-                </p>
-              </div>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#ec1d64]/35 pb-4">
+            <div className="space-y-1">
+              <span className="text-xs font-rainflow-condensed font-bold uppercase tracking-[0.24em] text-[#ec1d64]">
+                UNINTERRUPTED MARATHON SESSIONS
+              </span>
+              <h2 className="font-display font-black text-3xl sm:text-4xl text-white uppercase tracking-tight">
+                NONSTOP MIXES
+              </h2>
             </div>
 
             <button
               onClick={() => onNavigate('nonstops')}
-              className="cursor-pointer flex items-center gap-1 text-xs sm:text-sm text-amber-300 hover:text-sky-300 font-bold transition group"
+              className="cursor-pointer self-start sm:self-auto inline-flex items-center gap-1.5 font-rainflow-condensed text-xs font-bold uppercase tracking-[0.18em] text-[#ff4f8d] hover:text-white transition"
             >
-              <span>VIEW ALL ({publishedNonstops.length})</span>
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+              <span>ALL NONSTOPS ({publishedNonstops.length})</span>
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </ScrollReveal>
@@ -456,82 +526,223 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
         {isLoadingContent && publishedNonstops.length === 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[0, 1, 2].map((sk) => (
-              <div key={sk} className="h-72 rounded-2xl royal-glass-card animate-pulse" />
+              <div key={sk} className="h-80 bg-[#16072b] border border-white/10 animate-pulse" />
             ))}
           </div>
         ) : publishedNonstops.length === 0 ? (
-          <div className="rounded-2xl royal-glass-card p-8 text-center space-y-2">
-            <Music className="w-10 h-10 text-amber-400/40 mx-auto" />
-            <h3 className="text-base font-bold text-white font-display">No Nonstops Published Yet</h3>
-            <p className="text-xs text-slate-400 max-w-md mx-auto">
-              Real continuous nonstops by DJ EMMA PRO will appear here immediately after uploading.
+          <div className="bg-[#16072b] border border-white/10 p-10 text-center space-y-2">
+            <Music className="w-10 h-10 text-[#ec1d64]/60 mx-auto" />
+            <h3 className="text-base font-bold text-white">No Nonstop Mixes Published Yet</h3>
+            <p className="text-xs text-purple-200/70 max-w-md mx-auto">
+              Continuous nonstop mixes by DJ EMMA PRO will appear here immediately after uploading.
             </p>
           </div>
         ) : (
-          <NonstopsCarousel3D
-            nonstops={publishedNonstops}
-            onLikeNonstop={(id) => onLikeMix(id, 'nonstop')}
-            onOpenComments={onOpenComments}
-            commentCounts={commentCounts}
-            showTracklistInFocus={true}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {publishedNonstops.map((nonstop) => (
+              <MixCardRainflow
+                key={nonstop.id}
+                mix={nonstop}
+                trackType="nonstop"
+                onLike={(id) => onLikeMix(id, 'nonstop')}
+                onOpenComments={onOpenComments}
+                commentCount={commentCounts[nonstop.id] || 0}
+                showTracklist={true}
+              />
+            ))}
+          </div>
         )}
       </section>
 
-      {/* ---------------------------------------------------- */}
-      {/* SECTION 4: ARTIST PROFILE HIGHLIGHT                   */}
-      {/* ---------------------------------------------------- */}
-      <section className="max-w-7xl mx-auto px-4 lg:px-8">
-        <ScrollReveal>
-          <div className="relative rounded-3xl royal-glass-card electric-gold-shimmer card-3d-hover border-2 border-amber-400/50 p-6 sm:p-10 overflow-hidden shadow-2xl">
-            <div className="space-y-4">
-              <span className="inline-block px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-sky-500/15 text-sky-300 border border-sky-400/40">
-                THE WAKANDA BOSS EXPERIENCE
+      {/* ==================================================================== */}
+      {/* SECTION 7: LATEST MIXTAPES (TRACKLIST / RELEASE CATALOG)             */}
+      {/* ==================================================================== */}
+      {latestMixtapes.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 space-y-8">
+          <ScrollReveal>
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#ec1d64]/35 pb-4">
+              <div className="space-y-1">
+                <span className="text-xs font-rainflow-condensed font-bold uppercase tracking-[0.24em] text-[#ec1d64]">
+                  COMPLETE RELEASES & DIRECT DOWNLOADS
+                </span>
+                <h2 className="font-display font-black text-3xl sm:text-4xl text-white uppercase tracking-tight">
+                  LATEST MIXTAPES
+                </h2>
+              </div>
+
+              <span className="font-mono text-xs text-pink-200/80">
+                {latestMixtapes.length} Published Releases
               </span>
-              <h2 className="text-2xl sm:text-4xl font-black gold-chrome-text font-display uppercase tracking-tight">
-                DJ EMMA PRO • BIOGRAPHY & SERVICES
-              </h2>
-              <p className="text-slate-200 text-sm sm:text-base leading-relaxed max-w-4xl">
-                {artist.bio}
+            </div>
+          </ScrollReveal>
+
+          <div className="divide-y divide-white/10 bg-[#16072b] border border-[#ec1d64]/30">
+            {latestMixtapes.map((item, idx) => {
+              const isItemPlaying = currentTrack?.id === item.id && isPlaying;
+              return (
+                <div
+                  key={`${item.releaseKind}-${item.id}`}
+                  className="p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.03] transition"
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    <span className="font-mono text-xs text-[#ec1d64] font-bold w-6 shrink-0">
+                      {String(idx + 1).padStart(2, '0')}
+                    </span>
+
+                    <div className="w-12 h-12 shrink-0 overflow-hidden bg-[#0e041f] border border-white/15">
+                      {item.coverUrl ? (
+                        <img
+                          src={item.coverUrl}
+                          alt={item.title}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Disc3 className="w-5 h-5 text-[#ec1d64]" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-sm sm:text-base text-white truncate">
+                        {item.title}
+                      </h3>
+                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-purple-200/75">
+                        <span className="text-pink-300 font-semibold uppercase">
+                          {item.releaseKind === 'live' ? 'Live Mix' : 'Nonstop Mix'}
+                        </span>
+                        <span aria-hidden="true">·</span>
+                        <span>{item.genre}</span>
+                        <span aria-hidden="true">·</span>
+                        <span className="font-mono">{item.duration}</span>
+                        <span aria-hidden="true">·</span>
+                        <span className="font-mono">{item.playsCount} plays</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                    <button
+                      onClick={() => {
+                        if (currentTrack?.id === item.id) {
+                          togglePlay();
+                        } else {
+                          playTrack(item, item.releaseKind);
+                        }
+                      }}
+                      className={`cursor-pointer px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition ${
+                        isItemPlaying
+                          ? 'bg-[#ec1d64] text-white'
+                          : 'bg-[#230b47] hover:bg-[#ec1d64] text-white border border-white/15'
+                      }`}
+                    >
+                      {isItemPlaying ? (
+                        <>
+                          <Pause className="w-3.5 h-3.5 fill-white" />
+                          <span>PAUSE</span>
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-3.5 h-3.5 fill-white" />
+                          <span>PLAY</span>
+                        </>
+                      )}
+                    </button>
+
+                    {item.audioUrl && (
+                      <a
+                        href={`/.netlify/functions/download-audio?url=${encodeURIComponent(item.audioUrl)}&title=${encodeURIComponent(item.title)}`}
+                        download={`${item.title.replace(/[^a-zA-Z0-9._-]/g, '_')}.mp3`}
+                        className="px-4 py-2 bg-[#0e041f] hover:bg-[#ec1d64] text-pink-200 hover:text-white text-xs font-bold uppercase tracking-wider border border-[#ec1d64]/45 flex items-center gap-1.5 transition"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>DOWNLOAD</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Article Fullscreen Read More Modal */}
+      {selectedArticle && (
+        <div
+          onClick={() => setSelectedArticle(null)}
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-3xl bg-[#16072b] border-2 border-[#ec1d64] shadow-2xl overflow-hidden my-8"
+          >
+            <button
+              onClick={() => setSelectedArticle(null)}
+              aria-label="Close article modal"
+              className="cursor-pointer absolute top-4 right-4 z-20 w-9 h-9 bg-black/80 hover:bg-[#ec1d64] text-white flex items-center justify-center transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {selectedArticle.imageUrl && (
+              <div className="w-full max-h-[400px] bg-[#0e041f] overflow-hidden">
+                <img
+                  src={selectedArticle.imageUrl}
+                  alt={selectedArticle.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
+            <div className="p-6 sm:p-8 space-y-4">
+              <div className="flex items-center gap-2 text-xs text-pink-300 font-semibold">
+                <Calendar className="w-4 h-4 text-[#ec1d64]" />
+                <span>{formatDate(selectedArticle.createdAt)}</span>
+                <span aria-hidden="true">·</span>
+                <span>DJ EMMA PRO · THE WAKANDA BOSS</span>
+              </div>
+
+              <h3 className="font-display font-black text-2xl sm:text-3xl text-white">
+                {selectedArticle.title}
+              </h3>
+
+              <p className="text-sm sm:text-base text-purple-100/90 leading-relaxed whitespace-pre-line">
+                {selectedArticle.content}
               </p>
-              <div className="flex flex-wrap gap-4 pt-3">
+
+              <div className="pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => onLikeNews(selectedArticle.id)}
+                    className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 bg-[#230b47] hover:bg-[#ec1d64] text-white text-xs font-bold transition"
+                  >
+                    <Heart className="w-3.5 h-3.5" />
+                    <span>Like ({selectedArticle.likesCount})</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const target = selectedArticle;
+                      setSelectedArticle(null);
+                      onOpenComments?.(target.id, 'news', target.title);
+                    }}
+                    className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 bg-[#230b47] hover:bg-[#ec1d64] text-white text-xs font-bold transition"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>Comments ({commentCounts[selectedArticle.id] || 0})</span>
+                  </button>
+                </div>
+
                 <button
-                  onClick={() => onNavigate('about-me')}
-                  className="cursor-pointer px-6 py-3 rounded-full gold-btn text-xs font-black uppercase tracking-wider"
+                  onClick={() => setSelectedArticle(null)}
+                  className="cursor-pointer px-4 py-1.5 border border-white/25 text-xs font-bold uppercase tracking-wider text-white hover:bg-white/10"
                 >
-                  VIEW FULL ABOUT ME & SERVICES
+                  Close
                 </button>
-                <a
-                  href={`https://wa.me/${artist.bookingWhatsapp.replace(/[^0-9]/g, '')}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="cursor-pointer px-6 py-3 rounded-full royal-glass-card hover:bg-sky-500/15 text-amber-300 hover:text-sky-200 font-bold text-xs uppercase tracking-wider border border-sky-400/40 transition"
-                >
-                  DIRECT BOOKING / WHATSAPP
-                </a>
               </div>
             </div>
           </div>
-        </ScrollReveal>
-      </section>
-
-      {/* Picture Fullscreen Preview Modal */}
-      {previewImage && (
-        <div
-          onClick={() => setPreviewImage(null)}
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer animate-in fade-in duration-200"
-        >
-          <button
-            onClick={() => setPreviewImage(null)}
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/20 text-white hover:bg-white/30 cursor-pointer"
-          >
-            <X className="w-6 h-6" />
-          </button>
-          <img
-            src={previewImage}
-            alt="Full Preview"
-            className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl border-2 border-amber-400/60"
-          />
         </div>
       )}
     </div>

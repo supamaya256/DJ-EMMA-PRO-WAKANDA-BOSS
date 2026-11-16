@@ -4,317 +4,188 @@
   body {
     font-family: 'Montserrat', sans-serif;
     overflow-x: hidden;
-    background-color: #060a16;
+    background-color: #0e041f;
     color: #ffffff;
   }
-  
+
   h1, h2, h3, h4, .font-display {
-    font-family: 'Orbitron', 'Rajdhani', 'Montserrat', sans-serif;
+    font-family: 'Montserrat', 'Oswald', sans-serif;
   }
 }
 
 /* -------------------------------------------------- */
-/* METALLIC GOLD & ROYAL BLUE THEME UTILITIES        */
+/* DJ RAINFLOW COSMIC VIOLET & NEON MAGENTA THEME     */
 /* -------------------------------------------------- */
 
-/* 3D Shiny Metallic Gold Chrome Text */
-.gold-chrome-text {
-  background: linear-gradient(
-    180deg,
-    #fff7d6 0%,
-    #fde047 25%,
-    #eab308 50%,
-    #ca8a04 75%,
-    #854d0e 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 12px rgba(250, 204, 21, 0.35));
+.font-rainflow-condensed {
+  font-family: 'Oswald', 'Montserrat', sans-serif;
 }
 
-/* Chrome Silver/Ice Text */
-.chrome-text {
-  background: linear-gradient(
-    180deg,
-    #ffffff 0%,
-    #f1f5f9 25%,
-    #cbd5e1 48%,
-    #94a3b8 52%,
-    #f8fafc 75%,
-    #64748b 100%
-  );
+/* DJ Rainflow Cyan-Purple-Magenta Logo Monogram Gradient */
+.rainflow-logo-gradient {
+  background: linear-gradient(115deg, #ffffff 0%, #38bdf8 34%, #8b5cf6 64%, #ec1d64 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
 }
 
-/* Royal Blue Glass Card with Gold Metallic Border */
+/* Cosmic Purple Glass Surface */
 .royal-glass-card {
   background: linear-gradient(
-    145deg,
-    rgba(14, 26, 56, 0.85) 0%,
-    rgba(8, 15, 35, 0.92) 50%,
-    rgba(4, 7, 18, 0.98) 100%
+    155deg,
+    rgba(30, 12, 62, 0.9) 0%,
+    rgba(19, 6, 41, 0.95) 55%,
+    rgba(12, 4, 27, 0.99) 100%
   );
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  box-shadow: 
-    0 10px 35px rgba(0, 0, 0, 0.7),
-    0 0 20px rgba(245, 158, 11, 0.08),
-    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(236, 29, 100, 0.28);
+  box-shadow:
+    0 14px 38px rgba(4, 1, 14, 0.78),
+    0 0 22px rgba(139, 92, 246, 0.08);
 }
 
 .royal-glass-card:hover {
-  border-color: rgba(245, 158, 11, 0.6);
-  box-shadow: 
-    0 14px 40px rgba(0, 0, 0, 0.85),
-    0 0 25px rgba(245, 158, 11, 0.2),
-    inset 0 1px 2px rgba(255, 255, 255, 0.25);
+  border-color: rgba(236, 29, 100, 0.65);
+  box-shadow:
+    0 18px 46px rgba(4, 1, 14, 0.88),
+    0 0 28px rgba(236, 29, 100, 0.2);
 }
 
-/* Premium Gold Glow Box */
-.gold-glow {
-  box-shadow: 
-    0 0 25px rgba(245, 158, 11, 0.45),
-    inset 0 1px 2px rgba(255, 255, 255, 0.6);
+.glass-card {
+  background: linear-gradient(
+    155deg,
+    rgba(28, 10, 56, 0.9) 0%,
+    rgba(16, 5, 36, 0.96) 100%
+  );
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(236, 29, 100, 0.24);
+  box-shadow: 0 12px 32px rgba(4, 1, 14, 0.8);
 }
 
-/* Royal Navy Sticky Navigation Bar */
+/* Top Navigation Bar (Cosmic Deep Indigo) */
 .royal-nav-bar {
   background: linear-gradient(
     180deg,
-    rgba(10, 18, 38, 0.96) 0%,
-    rgba(6, 11, 25, 0.97) 100%
+    rgba(14, 4, 31, 0.96) 0%,
+    rgba(18, 6, 39, 0.95) 100%
   );
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(245, 158, 11, 0.4);
-  box-shadow: 
-    0 4px 30px rgba(0, 0, 0, 0.85),
-    0 0 20px rgba(245, 158, 11, 0.15);
+  border-bottom: 1px solid rgba(236, 29, 100, 0.25);
+  box-shadow: 0 8px 32px rgba(4, 1, 14, 0.85);
 }
 
-/* Active Nav Button Capsule in Royal Blue / Gold */
+/* Crisp DJ Rainflow Active Link State */
 .royal-nav-active {
-  background: linear-gradient(
-    180deg,
-    rgba(30, 58, 138, 0.9) 0%,
-    rgba(23, 37, 84, 0.95) 100%
-  );
-  border: 1px solid rgba(250, 204, 21, 0.85);
-  color: #fef08a !important;
-  box-shadow: 
-    0 0 18px rgba(245, 158, 11, 0.5),
-    inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  color: #ff4785 !important;
+  border-bottom: 2px solid #ec1d64;
 }
 
-/* Shiny Gold Metallic Button */
+/* DJ Rainflow Primary Dark-Indigo / Magenta Action Button */
+.rainflow-btn-primary {
+  background-color: #1c0833;
+  color: #ffffff;
+  border: 1px solid rgba(236, 29, 100, 0.65);
+  box-shadow: 0 10px 26px rgba(4, 1, 14, 0.65);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rainflow-btn-primary:hover {
+  background-color: #ec1d64;
+  border-color: #ff4f8d;
+  color: #ffffff;
+  box-shadow: 0 12px 30px rgba(236, 29, 100, 0.45);
+  transform: translateY(-1px);
+}
+
+/* Vibrant Neon Magenta Action Button */
 .gold-btn {
-  background: linear-gradient(
-    180deg,
-    #fef08a 0%,
-    #facc15 30%,
-    #eab308 70%,
-    #ca8a04 100%
-  );
-  color: #0f172a;
+  background: linear-gradient(135deg, #ec1d64 0%, #db1559 55%, #b80d49 100%);
+  color: #ffffff;
   font-weight: 800;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
-  box-shadow: 
-    0 4px 15px rgba(234, 179, 8, 0.4),
-    inset 0 1px 1px rgba(255, 255, 255, 0.8);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow:
+    0 6px 20px rgba(236, 29, 100, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.28);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .gold-btn:hover {
-  background: linear-gradient(
-    180deg,
-    #ffffff 0%,
-    #fef08a 35%,
-    #facc15 75%,
-    #eab308 100%
-  );
-  box-shadow: 
-    0 6px 25px rgba(245, 158, 11, 0.65),
-    inset 0 1px 2px rgba(255, 255, 255, 0.9);
+  background: linear-gradient(135deg, #ff2e78 0%, #ec1d64 60%, #d11254 100%);
+  box-shadow:
+    0 10px 28px rgba(236, 29, 100, 0.55),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
   transform: translateY(-1px);
 }
 
 .gold-btn:active {
   transform: translateY(1px);
-  box-shadow: 0 2px 8px rgba(234, 179, 8, 0.4);
 }
 
-/* Legacy aliases for compatibility */
-.glass-nav-bar {
-  background: linear-gradient(
-    180deg,
-    rgba(14, 25, 52, 0.94) 0%,
-    rgba(7, 13, 28, 0.96) 100%
-  );
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+/* Gradient Headline Accent */
+.gold-chrome-text {
+  background: linear-gradient(180deg, #ffffff 0%, #f5edff 58%, #f472b6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 3px 10px rgba(8, 2, 20, 0.75));
 }
 
-.glass-nav-active {
-  background: linear-gradient(
-    180deg,
-    rgba(30, 58, 138, 0.9) 0%,
-    rgba(23, 37, 84, 0.95) 100%
-  );
-  border: 1px solid rgba(250, 204, 21, 0.85);
-  color: #fef08a !important;
-  box-shadow: 
-    0 0 16px rgba(245, 158, 11, 0.45),
-    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+.electric-blue-glow {
+  box-shadow:
+    0 0 32px rgba(236, 29, 100, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08);
 }
 
-.glass-card {
-  background: linear-gradient(
-    145deg,
-    rgba(15, 27, 58, 0.85) 0%,
-    rgba(8, 15, 35, 0.92) 50%,
-    rgba(4, 7, 18, 0.98) 100%
-  );
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+/* Hero Atmospheric Stage Sky (Reproduces DJ Rainflow cosmic cloud lighting) */
+.rainflow-hero-sky {
+  background-color: #130528;
+  background-image:
+    radial-gradient(ellipse 68% 60% at 72% 40%, rgba(236, 29, 100, 0.38) 0%, rgba(124, 58, 237, 0.24) 45%, transparent 78%),
+    radial-gradient(ellipse 55% 50% at 22% 72%, rgba(56, 189, 248, 0.16) 0%, rgba(168, 85, 247, 0.18) 42%, transparent 76%),
+    radial-gradient(circle at 50% 0%, rgba(236, 29, 100, 0.22) 0%, transparent 55%),
+    linear-gradient(135deg, #0d031f 0%, #1d083d 48%, #2e0f4e 78%, #120426 100%);
 }
 
-/* Custom Gold/Navy Scrollbar */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #040712;
+  background: #0e041f;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(245, 158, 11, 0.4);
+  background: rgba(236, 29, 100, 0.42);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(250, 204, 21, 0.8);
+  background: rgba(236, 29, 100, 0.8);
 }
 
-/* Subtle animation classes */
-@keyframes goldPulse {
-  0%, 100% {
-    box-shadow: 0 0 15px rgba(245, 158, 11, 0.25), 0 0 8px rgba(56, 189, 248, 0.12);
-  }
-  50% {
-    box-shadow: 0 0 26px rgba(245, 158, 11, 0.5), 0 0 18px rgba(56, 189, 248, 0.28);
-  }
-}
-
-.animate-gold-pulse {
-  animation: goldPulse 3s infinite ease-in-out;
-}
-
-/* -------------------------------------------------- */
-/* GOLD & ELECTRIC-BLUE PREMIUM ANIMATIONS           */
-/* -------------------------------------------------- */
-
-/* Scroll Reveal Motion (GPU-composited transform + opacity only) */
+/* Scroll Reveal Animation */
 .scroll-reveal-item {
   opacity: 0;
-  transform: translate3d(0, 22px, 0) scale(0.985);
+  transform: translate3d(0, 22px, 0);
   transition:
-    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
 .scroll-reveal-item.is-revealed {
   opacity: 1;
-  transform: translate3d(0, 0, 0) scale(1);
+  transform: translate3d(0, 0, 0);
 }
 
-/* Subtle 3D Hover Card Elevation with Gold & Electric-Blue Aura */
-.card-3d-hover {
-  transform: perspective(1000px) translate3d(0, 0, 0) rotateX(0deg);
-  transition:
-    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.28s ease,
-    box-shadow 0.32s ease;
-  will-change: transform;
-}
-
-.card-3d-hover:hover {
-  transform: perspective(1000px) translate3d(0, -6px, 0) rotateX(1.2deg);
-  border-color: rgba(250, 204, 21, 0.85);
-  box-shadow:
-    0 18px 42px rgba(0, 0, 0, 0.82),
-    0 0 28px rgba(56, 189, 248, 0.26),
-    0 0 18px rgba(245, 158, 11, 0.32),
-    inset 0 1px 2px rgba(255, 255, 255, 0.28);
-}
-
-/* Active Playing Track Glow */
-.card-playing-glow {
-  border-color: rgba(56, 189, 248, 0.9) !important;
-  box-shadow:
-    0 14px 40px rgba(0, 0, 0, 0.85),
-    0 0 32px rgba(56, 189, 248, 0.38),
-    0 0 22px rgba(245, 158, 11, 0.36);
-}
-
-/* Smooth Image Hover Zoom */
 .img-smooth-zoom {
-  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s ease;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
 }
 
 .group:hover .img-smooth-zoom {
-  transform: scale(1.06);
-  filter: brightness(1.06) contrast(1.03);
+  transform: scale(1.04);
 }
 
-/* Electric-Blue & Gold Animated Beam / Sweep */
-@keyframes electricGoldSweep {
-  0% {
-    transform: translateX(-100%);
-    opacity: 0;
-  }
-  20% {
-    opacity: 0.75;
-  }
-  80% {
-    opacity: 0.75;
-  }
-  100% {
-    transform: translateX(200%);
-    opacity: 0;
-  }
-}
-
-.electric-gold-shimmer {
-  position: relative;
-  overflow: hidden;
-}
-
-.electric-gold-shimmer::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 55%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(56, 189, 248, 0.14) 35%,
-    rgba(250, 204, 21, 0.18) 55%,
-    transparent 100%
-  );
-  transform: translateX(-100%);
-  pointer-events: none;
-  animation: electricGoldSweep 6s infinite ease-in-out;
-}
-
-/* Latest News Moving Ticker */
+/* Moving Latest News Ticker */
 @keyframes tickerScroll {
   0% {
     transform: translate3d(0, 0, 0);
@@ -336,38 +207,7 @@
   animation-play-state: paused;
 }
 
-/* Spotlight News Automatic Slide/Fade Transition */
-@keyframes spotlightSlideIn {
-  0% {
-    opacity: 0;
-    transform: translate3d(14px, 0, 0) scale(0.99);
-  }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-}
-
-.animate-spotlight-in {
-  animation: spotlightSlideIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Electric-Blue & Gold Progress Indicator for Spotlight Auto-Cycle */
-@keyframes spotlightProgress {
-  0% {
-    transform: scaleX(0);
-  }
-  100% {
-    transform: scaleX(1);
-  }
-}
-
-.spotlight-progress-bar {
-  transform-origin: left center;
-  animation: spotlightProgress 7s linear infinite;
-}
-
-/* Audio Equalizer Bars Animation */
+/* Inline Mini Equalizer Bars while Streaming a Card */
 @keyframes eqBounce {
   0%, 100% {
     transform: scaleY(0.35);
@@ -389,34 +229,6 @@
   transform-origin: bottom;
   animation: eqBounce 0.72s ease-in-out 0.3s infinite;
 }
-.eq-bar-4 {
-  transform-origin: bottom;
-  animation: eqBounce 0.58s ease-in-out 0.1s infinite;
-}
-
-/* Electric-Blue & Gold Border Halo */
-.electric-blue-glow {
-  box-shadow:
-    0 0 24px rgba(56, 189, 248, 0.25),
-    0 0 14px rgba(245, 158, 11, 0.2),
-    inset 0 1px 1px rgba(186, 230, 253, 0.22);
-}
-
-/* 3D Carousel Foreground Enlarged Card Entrance */
-@keyframes carouselFocusIn {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 16px, 0) scale(0.9);
-  }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-}
-
-.animate-carousel-focus-in {
-  animation: carouselFocusIn 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
 
 /* Respect Reduced Motion Preferences */
 @media (prefers-reduced-motion: reduce) {
@@ -426,17 +238,9 @@
     transition: none !important;
   }
   .news-ticker-track,
-  .animate-gold-pulse,
-  .electric-gold-shimmer::after,
-  .spotlight-progress-bar,
-  .animate-carousel-focus-in,
   .eq-bar-1,
   .eq-bar-2,
-  .eq-bar-3,
-  .eq-bar-4 {
+  .eq-bar-3 {
     animation: none !important;
-  }
-  .card-3d-hover:hover {
-    transform: none;
   }
 }

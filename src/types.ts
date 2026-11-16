@@ -94,7 +94,17 @@ export interface SupabaseStatus {
   };
 }
 
-export type ActiveTab = 'home' | 'live-mixes' | 'nonstops' | 'about-me' | 'admin' | 'privacy-policy' | 'terms-conditions';
+export type ActiveTab =
+  | 'home'
+  | 'live-mixes'
+  | 'nonstops'
+  | 'news'
+  | 'about-me'
+  | 'gallery'
+  | 'contact'
+  | 'admin'
+  | 'privacy-policy'
+  | 'terms-conditions';
 
 export interface Comment {
   id: string;

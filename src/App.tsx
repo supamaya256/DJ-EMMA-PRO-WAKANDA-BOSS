@@ -1,28 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { ActiveTab, LiveMix, NonstopMix, NewsPost, ArtistInfo, HomepageConfig } from './types';
 import { AudioProvider } from './context/AudioContext';
-import { GlobalAudioPlayer } from './components/GlobalAudioPlayer';
 import { StartScreen } from './components/StartScreen';
 import { MainDashboardHeader } from './components/MainDashboardHeader';
 import { TopNavBar } from './components/TopNavBar';
 import { HomeSection } from './components/HomeSection';
 import { LiveMixesSection } from './components/LiveMixesSection';
 import { NonstopsSection } from './components/NonstopsSection';
+import { NewsSection } from './components/NewsSection';
 import { AboutSection } from './components/AboutSection';
+import { GallerySection } from './components/GallerySection';
+import { ContactSection } from './components/ContactSection';
 import { AdminDashboard } from './components/AdminDashboard';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { CommentsModal } from './components/CommentsModal';
 import { PrivacyPolicySection } from './components/PrivacyPolicySection';
 import { TermsConditionsSection } from './components/TermsConditionsSection';
 import { CookieConsentBanner } from './components/CookieConsentBanner';
-import { ShieldCheck, ArrowLeft, FileText, Lock, Cookie } from 'lucide-react';
+import { ShieldCheck, FileText, Lock, Cookie } from 'lucide-react';
 import { getVisitorId, toggleVisitorLikedId } from './lib/visitor';
 import { supabase } from './lib/supabase';
 
 const getInitialRouteInfo = (): { tab: ActiveTab; hasExplicitRoute: boolean } => {
   const path = window.location.pathname.replace(/^\/+|\/+$/g, '') as ActiveTab;
   const hash = window.location.hash.replace(/^#+/, '') as ActiveTab;
-  const validTabs: ActiveTab[] = ['home', 'live-mixes', 'nonstops', 'about-me', 'admin', 'privacy-policy', 'terms-conditions'];
+  const validTabs: ActiveTab[] = [
+    'home',
+    'live-mixes',
+    'nonstops',
+    'news',
+    'about-me',
+    'gallery',
+    'contact',
+    'admin',
+    'privacy-policy',
+    'terms-conditions',
+  ];
 
   if (validTabs.includes(path) && path !== 'home') {
     return { tab: path, hasExplicitRoute: true };
@@ -34,11 +47,7 @@ const getInitialRouteInfo = (): { tab: ActiveTab; hasExplicitRoute: boolean } =>
 };
 
 export default function App() {
-  const [hasStarted, setHasStarted] = useState<boolean>(() => {
-    const route = getInitialRouteInfo();
-    if (route.hasExplicitRoute) return true;
-    return sessionStorage.getItem('dj_emma_has_started') === 'true';
-  });
+  const [hasStarted, setHasStarted] = useState<boolean>(true);
 
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
     return getInitialRouteInfo().tab;
@@ -490,23 +499,17 @@ export default function App() {
 
   return (
     <AudioProvider>
-      <div className="min-h-screen bg-[#111317] text-white selection:bg-cyan-500 selection:text-black">
-        {/* FIRST DASHBOARD: ORIGINAL BLUE START SCREEN (IMAGE 1) */}
+      <div className="min-h-screen bg-[#0e041f] text-white selection:bg-[#ec1d64] selection:text-white">
         {!hasStarted ? (
           <StartScreen onStart={handleStart} />
         ) : (
-          /* SECOND DASHBOARD: ROYAL-BLUE & METALLIC-GOLD THEME */
-          <div className="relative min-h-screen flex flex-col justify-between bg-gradient-to-b from-[#060a16] via-[#0b142c] to-[#050811]">
-            
-            {/* 
-              PERMANENT STICKY / FIXED TOP NAVIGATION BAR:
-              Positioned sticky at top: 0 with z-50, stays permanently visible during scrolling.
-              Keeps DJ EMMA PRO logo, profile image, HOME, LIVE MIXES, NONSTOPS and ABOUT ME together.
-            */}
+          <div className="relative min-h-screen flex flex-col justify-between bg-gradient-to-b from-[#0e041f] via-[#130528] to-[#0a0217]">
+            {/* Sticky DJ Rainflow-Style Top Navigation Bar */}
             <TopNavBar
               activeTab={activeTab}
               onTabChange={handleTabChange}
               isAdmin={isAdminAuthenticated}
+              socialLinks={artist.socialLinks}
               onOpenAdmin={() => {
                 if (isAdminAuthenticated) {
                   handleTabChange('admin');
@@ -516,16 +519,15 @@ export default function App() {
               }}
             />
 
-            {/* 
-              IMAGE 2 MASTER DASHBOARD HERO:
-              Preserves DJ EMMA PRO photograph, 3D chrome lettering, and metallic royal blue/gold banner.
-              Duplicate lower navigation bar is completely removed.
-            */}
-            <section className="w-full bg-[#060a16] border-b border-amber-400/20 shadow-2xl">
-              <MainDashboardHeader />
-            </section>
+            {/* Show DJ Rainflow Hero only on HOME */}
+            {activeTab === 'home' && (
+              <MainDashboardHeader
+                onNavigate={handleTabChange}
+                tagline={homepage.tagline || artist.tagline}
+              />
+            )}
 
-            {/* Content Area Activated by the Navigation Overlays */}
+            {/* Main Content Router */}
             <main id="dashboard-content-area" className="flex-1 w-full scroll-mt-20">
               {activeTab === 'home' && (
                 <HomeSection
@@ -564,12 +566,34 @@ export default function App() {
                 />
               )}
 
+              {activeTab === 'news' && (
+                <NewsSection
+                  newsPosts={newsPosts}
+                  onLikeNews={handleLikeNews}
+                  onOpenComments={handleOpenComments}
+                  commentCounts={commentCounts}
+                  isLoadingContent={isLoadingContent}
+                />
+              )}
+
               {activeTab === 'about-me' && (
                 <AboutSection
                   artist={artist}
                   isAdmin={isAdminAuthenticated}
                   onOpenEditArtist={() => handleTabChange('admin')}
                 />
+              )}
+
+              {activeTab === 'gallery' && (
+                <GallerySection
+                  liveMixes={liveMixes}
+                  nonstops={nonstops}
+                  newsPosts={newsPosts}
+                />
+              )}
+
+              {activeTab === 'contact' && (
+                <ContactSection artist={artist} />
               )}
 
               {activeTab === 'privacy-policy' && (
@@ -597,16 +621,16 @@ export default function App() {
                     onLogout={handleLogout}
                   />
                 ) : (
-                  <div className="max-w-md mx-auto my-16 p-8 rounded-3xl royal-glass-card border border-amber-400/30 text-center space-y-4">
-                    <h3 className="text-xl font-bold gold-chrome-text font-display uppercase">
+                  <div className="max-w-md mx-auto my-16 p-8 bg-[#16072b] border border-[#ec1d64]/45 text-center space-y-4">
+                    <h3 className="text-xl font-bold text-white font-display uppercase">
                       Admin Access Required
                     </h3>
-                    <p className="text-xs text-slate-300">
+                    <p className="text-xs text-purple-200/80">
                       Please unlock the admin dashboard with your private DJ PIN.
                     </p>
                     <button
                       onClick={() => setIsLoginModalOpen(true)}
-                      className="px-6 py-3 rounded-full gold-btn text-slate-950 font-extrabold text-xs uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-3 gold-btn text-white font-bold text-xs uppercase tracking-wider cursor-pointer"
                     >
                       ENTER ADMIN PIN
                     </button>
@@ -614,9 +638,6 @@ export default function App() {
                 )
               )}
             </main>
-
-            {/* Persistent Global Audio Player Dock */}
-            <GlobalAudioPlayer />
 
             {/* Admin Login Modal */}
             <AdminLoginModal
@@ -635,105 +656,98 @@ export default function App() {
               onCommentAdded={handleCommentAdded}
             />
 
-            {/* Cookie Consent Management Banner with Granular Preferences Modal */}
+            {/* Cookie Consent Management Banner */}
             <CookieConsentBanner
               onNavigateToPrivacy={() => handleTabChange('privacy-policy')}
               isOpenPreferences={isCookiePreferencesOpen}
               onClosePreferences={() => setIsCookiePreferencesOpen(false)}
             />
 
-            {/* Google AdSense Compliant Footer with Legal Pages & Privacy Controls */}
-            <footer className="w-full border-t border-amber-400/20 py-8 px-4 text-xs text-slate-400 bg-[#060a16]/95 backdrop-blur-md">
+            {/* DJ Rainflow Cosmic Footer */}
+            <footer className="w-full border-t border-[#ec1d64]/35 py-10 px-4 sm:px-6 lg:px-10 text-xs text-purple-200/75 bg-[#090214]">
               <div className="max-w-7xl mx-auto space-y-6">
-                
-                {/* Top Row: Brand & Quick Navigation */}
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-white/10 pb-6">
-                  <div className="flex items-center gap-2">
-                    <span className="font-display font-black text-amber-300 gold-chrome-text text-base">
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    <span className="font-display font-black rainflow-logo-gradient text-lg">
                       DJ EMMA PRO
                     </span>
-                    <span className="text-amber-400">•</span>
-                    <span className="text-slate-300 font-bold uppercase tracking-wider text-[11px]">THE WAKANDA BOSS</span>
-                    <span className="text-amber-400">•</span>
-                    <span className="text-slate-400 text-[11px]">Serere ➔ Kampala, Uganda</span>
+                    <span className="text-[#ec1d64]">·</span>
+                    <span className="text-white font-bold uppercase tracking-wider text-[11px]">
+                      THE WAKANDA BOSS
+                    </span>
+                    <span className="text-[#ec1d64]">·</span>
+                    <span className="text-purple-200/70 text-[11px]">
+                      Serere ➔ Kampala, Uganda
+                    </span>
                   </div>
 
-                  {/* Main Navigation Links in Footer */}
-                  <div className="flex flex-wrap items-center justify-center gap-4 text-[12px] font-semibold text-slate-300">
-                    <button onClick={() => handleTabChange('home')} className="hover:text-amber-300 transition cursor-pointer">
-                      Home
-                    </button>
-                    <button onClick={() => handleTabChange('live-mixes')} className="hover:text-amber-300 transition cursor-pointer">
-                      Live Mixes
-                    </button>
-                    <button onClick={() => handleTabChange('nonstops')} className="hover:text-amber-300 transition cursor-pointer">
-                      Nonstop Mixes
-                    </button>
-                    <button onClick={() => handleTabChange('about-me')} className="hover:text-amber-300 transition cursor-pointer">
-                      About & Booking
-                    </button>
+                  {/* All 7 Navigation Routes in Footer */}
+                  <div className="flex flex-wrap items-center justify-center gap-4 text-[12px] font-rainflow-condensed font-semibold uppercase tracking-wider text-purple-100">
+                    <button onClick={() => handleTabChange('home')} className="hover:text-[#ec1d64] transition cursor-pointer">Home</button>
+                    <button onClick={() => handleTabChange('live-mixes')} className="hover:text-[#ec1d64] transition cursor-pointer">Live Mixes</button>
+                    <button onClick={() => handleTabChange('nonstops')} className="hover:text-[#ec1d64] transition cursor-pointer">Nonstop Mixes</button>
+                    <button onClick={() => handleTabChange('news')} className="hover:text-[#ec1d64] transition cursor-pointer">News</button>
+                    <button onClick={() => handleTabChange('about-me')} className="hover:text-[#ec1d64] transition cursor-pointer">About Me</button>
+                    <button onClick={() => handleTabChange('gallery')} className="hover:text-[#ec1d64] transition cursor-pointer">Gallery</button>
+                    <button onClick={() => handleTabChange('contact')} className="hover:text-[#ec1d64] transition cursor-pointer">Contact</button>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={handleReturnToStart}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition text-[11px] cursor-pointer"
-                    >
-                      <ArrowLeft className="w-3 h-3 text-amber-300" />
-                      <span>Start Screen</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        if (isAdminAuthenticated) {
-                          handleTabChange('admin');
-                        } else {
-                          setIsLoginModalOpen(true);
-                        }
-                      }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/30 transition text-[11px] cursor-pointer"
-                    >
-                      <ShieldCheck className="w-3 h-3 text-amber-400" />
-                      <span>{isAdminAuthenticated ? 'Admin Panel' : 'DJ Login'}</span>
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => {
+                      if (isAdminAuthenticated) {
+                        handleTabChange('admin');
+                      } else {
+                        setIsLoginModalOpen(true);
+                      }
+                    }}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1b0833] hover:bg-[#ec1d64] text-pink-200 hover:text-white border border-[#ec1d64]/45 transition text-[11px] font-bold uppercase tracking-wider cursor-pointer"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>{isAdminAuthenticated ? 'Admin Panel' : 'DJ Login'}</span>
+                  </button>
                 </div>
 
-                {/* Middle Row: Google AdSense Mandatory Legal Pages & Cookie Consent */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-400">
+                {/* Mandatory Legal & Privacy Disclosures */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-purple-200/70">
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4">
                     <button
                       onClick={() => handleTabChange('privacy-policy')}
-                      className="flex items-center gap-1.5 hover:text-amber-300 transition underline underline-offset-4 cursor-pointer"
+                      className="flex items-center gap-1.5 hover:text-[#ec1d64] transition underline underline-offset-4 cursor-pointer"
                     >
-                      <Lock className="w-3 h-3 text-amber-400" />
+                      <Lock className="w-3 h-3 text-[#ec1d64]" />
                       <span>Privacy Policy</span>
                     </button>
 
                     <button
                       onClick={() => handleTabChange('terms-conditions')}
-                      className="flex items-center gap-1.5 hover:text-amber-300 transition underline underline-offset-4 cursor-pointer"
+                      className="flex items-center gap-1.5 hover:text-[#ec1d64] transition underline underline-offset-4 cursor-pointer"
                     >
-                      <FileText className="w-3 h-3 text-amber-400" />
+                      <FileText className="w-3 h-3 text-[#ec1d64]" />
                       <span>Terms & Conditions</span>
                     </button>
 
                     <button
                       onClick={() => setIsCookiePreferencesOpen(true)}
-                      className="flex items-center gap-1.5 hover:text-amber-300 transition underline underline-offset-4 cursor-pointer text-amber-400 font-medium"
+                      className="flex items-center gap-1.5 hover:text-[#ec1d64] transition underline underline-offset-4 cursor-pointer text-pink-300 font-medium"
                     >
-                      <Cookie className="w-3 h-3 text-amber-400" />
+                      <Cookie className="w-3 h-3 text-[#ec1d64]" />
                       <span>Cookie Preferences</span>
+                    </button>
+
+                    <button
+                      onClick={handleReturnToStart}
+                      className="hover:text-[#ec1d64] transition underline underline-offset-4 cursor-pointer"
+                    >
+                      Intro Screen
                     </button>
                   </div>
 
-                  <div className="text-center sm:text-right text-[10px] text-slate-400">
-                    Google AdSense Partner Compliant • All Featured Artists Retain 100% IP Rights
+                  <div className="text-center sm:text-right text-[10px] text-purple-200/60">
+                    Google AdSense Partner Compliant · All Featured Artists Retain 100% IP Rights
                   </div>
                 </div>
 
-                {/* Bottom Row: Copyright & Disclaimers */}
-                <div className="text-center pt-2 text-[10px] text-slate-400">
+                <div className="text-center pt-2 text-[10px] text-purple-200/55">
                   &copy; {new Date().getFullYear()} DJ EMMA PRO (THE WAKANDA BOSS). Official Music & Entertainment Platform.
                 </div>
               </div>
